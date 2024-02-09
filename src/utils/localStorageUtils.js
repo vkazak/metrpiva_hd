@@ -1,13 +1,13 @@
 const EXPIRE_MS = 86400000; // 1 day
 
-const saveFilmData = (data) => {
-    localStorage.setItem(`film_${filmId}`, JSON.stringify({
+export const saveFilmDataToStorage = (data) => {
+    localStorage.setItem(`film_${data.kinopoiskId}`, JSON.stringify({
         ...data,
         timestamp: Date.now()
     }));
 }
 
-const getFilmData = (id) => {
+export const getFilmDataFromStorage = (id) => {
     const dataString = localStorage.getItem(`film_${id}`);
     const data = dataString ? JSON.parse(dataString) : null;
 
@@ -18,7 +18,7 @@ const getFilmData = (id) => {
     }
 }
 
-const updateFilmState = ({
+export const updateFilmStateInStorage = ({
     id,
     season,
     episode,
@@ -37,7 +37,7 @@ const updateFilmState = ({
     localStorage.setItem(`state_${id}`, JSON.stringify(newState));
 }
 
-const getFilmState = (id) => {
+export const getFilmStateFromStorage = (id) => {
     const stateString = localStorage.getItem(`state_${id}`);
     const state = stateString ? JSON.parse(stateString) : null;
 

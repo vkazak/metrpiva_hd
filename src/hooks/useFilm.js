@@ -2,13 +2,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { KP_WORKER_URL, VOIDBOOST_URL } from "../Constants";
 import { getFilmDataFromVoidboostHtml } from "../utils/getFilmDataFromVoidboostHtml";
 import { usePlayer } from "./usePlayer";
+import { getFilmDataFromStorage, saveFilmDataToStorage } from "../utils/localStorageUtils";
 
 const useFilmApi = () => {
 
     const getFilmData = async (id) => {
-        const filmResponse = await fetch(`${KP_WORKER_URL}/film?id=${id}`);
-        
-        return filmResponse.json();
+        if (getFilmDataFromStorage(id)) {
+            return getFilmDataFromStorage(id);
+        } else {
+            const filmResponse = await fetch(`${KP_WORKER_URL}/film?id=${id}`);
+            const filmData = await filmResponse.json();
+            saveFilmDataToStorage(filmData);
+
+            return filmData;
+        }
     }
 
     const getBalancerInitFilmData = async (id) => {
