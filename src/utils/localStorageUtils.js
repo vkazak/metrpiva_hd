@@ -29,6 +29,7 @@ export const updateFilmStateInStorage = ({
     const state = stateString ? JSON.parse(stateString) : {};
     
     const newState = {
+        id,
         translatorId: translatorId ? translatorId : state.translatorId,
         season: season ? season : state.season,
         episode: episode ? episode : state.episode,

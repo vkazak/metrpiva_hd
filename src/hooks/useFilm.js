@@ -167,6 +167,9 @@ export const useFilm = (id, initState) => {
                 token: translatorToken, 
                 type: balancerData.balancerType
             });
+
+            const hasSeasons = balancerDataNew?.seasons?.length;
+            let seasonEpisodeWasLoaded = null;
             // If new translator has current episode loading this
             const containsCurrentEpisode = balancerDataNew.episodes?.[selectedSeasonEpisode?.season]?.find(ep => ep.id == selectedSeasonEpisode?.episode);
             if (containsCurrentEpisode) {
@@ -176,21 +179,35 @@ export const useFilm = (id, initState) => {
                     type: balancerDataNew.balancerType,
                     season: selectedSeasonEpisode.season,
                     episode: selectedSeasonEpisode.episode 
-                })
+                });
+                seasonEpisodeWasLoaded = selectedSeasonEpisode;
+            } else if (hasSeasons) {
+                const firstSeasonEpisode = getFirstSeasonEpisode(balancerDataNew.seasons, balancerDataNew.episodes);
+                balancerDataNew = await getBalancerFilmData({
+                    id,
+                    token: translatorToken, 
+                    type: balancerDataNew.balancerType,
+                    season: firstSeasonEpisode.season,
+                    episode: firstSeasonEpisode.episode 
+                });
+                seasonEpisodeWasLoaded = firstSeasonEpisode;
             }
             setBalancerData(balancerDataNew);
             setSelectedTranslator(translatorId);
-            updateFilmStateInStorage({ id, translatorId });
+            updateFilmStateInStorage({ id, translatorId, season: seasonEpisodeWasLoaded.season, episode: seasonEpisodeWasLoaded.episode });
+    
             // TODO: logic when episode isn't found
             const currentPlayTime = getTime();
             const isPlaying = getIsPlaying();
+
+            setSelectedSeasonEpisode(seasonEpisodeWasLoaded);
 
             setStream({
                 stream: balancerDataNew.stream, 
                 thumbnails: balancerDataNew.thumbnails
             });
             setTime(currentPlayTime);
-            if ((containsCurrentEpisode || !balancerData?.seasons?.length) && isPlaying) {
+            if ((containsCurrentEpisode || !hasSeasons) && isPlaying) {
                 startPlaying();
             }
         } catch (err) {
