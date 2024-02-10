@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFilm } from "../hooks/useFilm"
 import { useParams } from "react-router-dom";
 import { Accordion, AccordionItem, Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
+import { getFilmStateFromStorage } from "../utils/localStorageUtils";
 
 const TranslatorsSelect = ({
     className = '',
@@ -110,11 +111,10 @@ export const FilmPage = () => {
     const { id } = useParams();
     const {
         isFilmDataLoading,
+        isBalancerFilmDataLoading,
         nameRu,
         nameOriginal,
         posterUrl,
-        stream,
-        thumbnails,
         translators,
         selectedTranslator,
         updateSelectedTranslator,
@@ -122,11 +122,10 @@ export const FilmPage = () => {
         episodes,
         selectedSeasonEpisode,
         updateSelectedSeasonEpisode,
-    } = useFilm(id);
+    } = useFilm(id, getFilmStateFromStorage(id));
 
     const onEpisodeSelect = useCallback(async (season, episode) => {
-        await updateSelectedSeasonEpisode(season, episode);
-        //startPlaying()
+        updateSelectedSeasonEpisode(season, episode);
     }, [updateSelectedSeasonEpisode]);
 
     return <>

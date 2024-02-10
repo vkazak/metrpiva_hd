@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { KP_WORKER_URL, VOIDBOOST_URL } from "../Constants";
 import { getFilmDataFromVoidboostHtml } from "../utils/getFilmDataFromVoidboostHtml";
 import { usePlayer } from "./usePlayer";
-import { getFilmDataFromStorage, saveFilmDataToStorage } from "../utils/localStorageUtils";
+import { getFilmDataFromStorage, saveFilmDataToStorage, updateFilmStateInStorage } from "../utils/localStorageUtils";
 
 const useFilmApi = () => {
 
@@ -66,12 +66,19 @@ const getFirstSeasonEpisode = (seasons, episodes) => {
     return { season: firstSeason, episode: firstEpisode };
 }
 
-export const useFilm = (id) => {
+const makeCUID = (id, season, episode) => {
+    return `cuid-${id}-${season ? 's' + season : ''}-${episode ? 'e' + episode : ''}`;
+}
+
+export const useFilm = (id, initState) => {
     const { getFilmData, getBalancerFilmData } = useFilmApi();
     const {
         isPlayerReady,
         setStream,
-        startPlaying
+        setTime,
+        getTime,
+        startPlaying,
+        getIsPlaying,
     } = usePlayer();
 
     const [isFilmDataLoading, setIsFilmDataLoading] = useState(true);
@@ -81,9 +88,9 @@ export const useFilm = (id) => {
     const [selectedTranslator, setSelectedTranslator] = useState('');
     const [selectedSeasonEpisode, setSelectedSeasonEpisode] = useState(null);
 
-    const getTranslatorToken = useCallback((translatorId) => {
-        return balancerData.translators?.find(tr => tr.id == translatorId)?.token || null;
-    }, [balancerData.translators]);
+    const getTranslatorToken = useCallback((translators, translatorId) => {
+        return translators?.find(tr => tr.id == translatorId)?.token || null;
+    }, []);
 
     useEffect(() => {
         const fetchFilmData = async () => {
@@ -107,10 +114,37 @@ export const useFilm = (id) => {
         const fetchBalancerData = async () => {
             setIsBalancerFilmDataLoading(true);
             try {
-                const balancerDataResponse = await getBalancerFilmData({ id });
+                let balancerDataResponse = await getBalancerFilmData({ id });
+                const filmInitState = {
+                    ...getFirstSeasonEpisode(balancerDataResponse.seasons, balancerDataResponse.episodes),
+                    ...(initState || {})
+                };
+
+                if (filmInitState.translatorId) {
+                    setSelectedTranslator(filmInitState.translatorId);
+                }
+                if (filmInitState.season) {
+                    setSelectedSeasonEpisode({ season: filmInitState.season, episode: filmInitState.episode });
+                }
+
+                const translatorToken = getTranslatorToken(balancerDataResponse.translators, filmInitState.translatorId);
+
+                balancerDataResponse = await getBalancerFilmData({
+                    id,
+                    token: translatorToken,
+                    type: balancerDataResponse.balancerType,
+                    season: filmInitState.season,
+                    episode: filmInitState.episode
+                });
+
                 setBalancerData(balancerDataResponse);
-                console.log(balancerDataResponse);
-                setStream(balancerDataResponse.stream, balancerDataResponse.thumbnails);
+                updateFilmStateInStorage({ id, season: filmInitState.season, episode: filmInitState.episode });
+
+                setStream({ 
+                    stream: balancerDataResponse.stream, 
+                    thumbnails: balancerDataResponse.thumbnails,
+                    cuid: makeCUID(id, filmInitState.season, filmInitState.episode)
+                });
             } catch (err) {
                 console.error(err);
             } finally {
@@ -124,25 +158,18 @@ export const useFilm = (id) => {
 
     }, [id, isPlayerReady]);
 
-    // This useEffect runs after init voidboost load. To load supposed episode if needed
-    useEffect(() => {
-        if (balancerData.seasons?.length && !selectedSeasonEpisode) {
-            const firstSeasonEpisode = getFirstSeasonEpisode(balancerData.seasons, balancerData.episodes);
-            updateSelectedSeasonEpisode(firstSeasonEpisode.season, firstSeasonEpisode.episode);
-        }
-    }, [balancerData, selectedSeasonEpisode]);
-
     const updateSelectedTranslator = useCallback(async (translatorId) => {
         setIsBalancerFilmDataLoading(true);
         try {
-            const translatorToken = getTranslatorToken(translatorId);
+            const translatorToken = getTranslatorToken(balancerData.translators, translatorId);
             let balancerDataNew = await getBalancerFilmData({ 
                 id,
                 token: translatorToken, 
                 type: balancerData.balancerType
             });
             // If new translator has current episode loading this
-            if (balancerDataNew.episodes?.[selectedSeasonEpisode?.season]?.find(ep => ep.id == selectedSeasonEpisode?.episode)) {
+            const containsCurrentEpisode = balancerDataNew.episodes?.[selectedSeasonEpisode?.season]?.find(ep => ep.id == selectedSeasonEpisode?.episode);
+            if (containsCurrentEpisode) {
                 balancerDataNew = await getBalancerFilmData({
                     id,
                     token: translatorToken, 
@@ -153,19 +180,30 @@ export const useFilm = (id) => {
             }
             setBalancerData(balancerDataNew);
             setSelectedTranslator(translatorId);
-            setStream(balancerDataNew.stream, balancerDataNew.thumbnails);
-            startPlaying();
+            updateFilmStateInStorage({ id, translatorId });
+            // TODO: logic when episode isn't found
+            const currentPlayTime = getTime();
+            const isPlaying = getIsPlaying();
+
+            setStream({
+                stream: balancerDataNew.stream, 
+                thumbnails: balancerDataNew.thumbnails
+            });
+            setTime(currentPlayTime);
+            if ((containsCurrentEpisode || !balancerData?.seasons?.length) && isPlaying) {
+                startPlaying();
+            }
         } catch (err) {
             console.error(err);
         } finally {
             setIsBalancerFilmDataLoading(false);
         }
-    }, [selectedSeasonEpisode, balancerData, setStream]);
+    }, [id, selectedSeasonEpisode, balancerData, setStream]);
 
     const updateSelectedSeasonEpisode = useCallback(async (season, episode) => {
         setIsBalancerFilmDataLoading(true);
         try {
-            const translatorToken = getTranslatorToken(selectedTranslator);
+            const translatorToken = getTranslatorToken(balancerData.translator, selectedTranslator);
             let balancerDataNew = await getBalancerFilmData({ 
                 id,
                 token: translatorToken, 
@@ -175,13 +213,22 @@ export const useFilm = (id) => {
             });
             setBalancerData(balancerDataNew);
             setSelectedSeasonEpisode({ season, episode });
-            setStream(balancerDataNew.stream, balancerDataNew.thumbnails);
+            updateFilmStateInStorage({ id, season, episode });
+            setStream({
+                stream: balancerDataNew.stream, 
+                episode: balancerDataNew.thumbnails,
+                cuid: makeCUID(id, season, episode)
+            });
         } catch (err) {
             console.error(err);
         } finally {
             setIsBalancerFilmDataLoading(false);
         }
-    }, [selectedTranslator, balancerData])
+    }, [id, selectedTranslator, balancerData]);
+
+    useEffect(() => {
+
+    }, []);
 
     return {
         isFilmDataLoading,

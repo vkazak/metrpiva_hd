@@ -20,6 +20,7 @@ export const getFilmDataFromStorage = (id) => {
 
 export const updateFilmStateInStorage = ({
     id,
+    translatorId,
     season,
     episode,
     time
@@ -28,6 +29,7 @@ export const updateFilmStateInStorage = ({
     const state = stateString ? JSON.parse(stateString) : {};
     
     const newState = {
+        translatorId: translatorId ? translatorId : state.translatorId,
         season: season ? season : state.season,
         episode: episode ? episode : state.episode,
         time: time ? time : state.time,
