@@ -21,8 +21,11 @@ export const usePlayer = () => {
         }
     }, []);
 
-    const setStream = useCallback((stream, thumbnails) => {
-        player?.api("file", stream);
+    const setStream = useCallback(({ stream, thumbnails, cuid }) => {
+        player?.api("preload", stream);
+        if (cuid) {
+            player?.api("cuid", cuid);
+        }
         if (thumbnails) {
             player?.api("thumbnails", thumbnails);
         }
@@ -32,9 +35,24 @@ export const usePlayer = () => {
         player?.api("play");
     }, [player]);
 
+    const setTime = useCallback((time) => {
+        player?.api("seek", time);
+    }, [player]);
+
+    const getTime = useCallback(() => {
+        return player?.api("time");
+    }, [player]);
+
+    const getIsPlaying = useCallback(() => {
+        return player?.api("playing");
+    }, [player])
+
     return {
         isPlayerReady,
         setStream,
         startPlaying,
+        setTime,
+        getTime,
+        getIsPlaying,
     }
 }

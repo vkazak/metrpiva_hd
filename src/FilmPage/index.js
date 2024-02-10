@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFilm } from "../hooks/useFilm"
 import { useParams } from "react-router-dom";
-import { Accordion, AccordionItem, Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
+import { Accordion, AccordionItem, Button, Divider, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
+import { getFilmStateFromStorage } from "../utils/localStorageUtils";
 
 const TranslatorsSelect = ({
     className = '',
@@ -59,7 +60,7 @@ const EpisodesAccordeon = ({ seasons, episodes, currentSeasonEpisode, onSelect }
     if (!seasons?.length) {
         return null;
     }
-
+    /*
     return <div className="backdrop-blur-sm shadow rounded">
         <Accordion>
             {seasons.map(season => (
@@ -80,17 +81,7 @@ const EpisodesAccordeon = ({ seasons, episodes, currentSeasonEpisode, onSelect }
                 </AccordionItem>
             ))}
         </Accordion>
-    </div>
-
-    /*return <div>
-        <ScrollShadow hideScrollBar orientation="horizontal">
-            <Tabs variant="underlined" onSelectionChange={setOpenSeason} selectedKey={openSeason}>
-                {seasons.map(season => (
-                    <Tab key={season.id} title={season.name} />
-                ))}
-            </Tabs>
-        </ScrollShadow>
-        <ScrollShadow hideScrollBar orientation="horizontal" className="flex no-wrap gap-2 mt-4">
+         <ScrollShadow orientation="horizontal" className="flex no-wrap gap-1 mt-4 ring p-4" scroll>
             {episodes[openSeason]?.map(episode => (
                 <Button 
                     key={episode.id} 
@@ -104,17 +95,70 @@ const EpisodesAccordeon = ({ seasons, episodes, currentSeasonEpisode, onSelect }
             ))}
         </ScrollShadow>
     </div>*/
+
+}
+
+const SeasonsList = ({ className, seasons, selectedSeason, onSelect }) => {
+    return <ScrollShadow orientation="horizontal" className={className}>
+        <Tabs variant="underlined" onSelectionChange={onSelect} selectedKey={selectedSeason} className="mb-2">
+            {seasons?.map(season => (
+                <Tab key={season.id} title={season.name} />
+            ))}
+        </Tabs>
+    </ScrollShadow>
+}
+
+const EpisodesList = ({ className, episodes, selectedEpisode, onSelect }) => {
+    return <ScrollShadow hideScrollBar className={className}>
+        {episodes?.map(episode => (
+            <Button 
+                key={episode.id} 
+                variant={selectedEpisode == episode.id ? 'shadow' : 'light'}
+                radius='none'
+                fullWidth
+                onClick={() => onSelect(episode.id)}
+            >
+                {episode.name}
+            </Button>
+        ))}
+    </ScrollShadow>
+}
+
+const AdditionalInfo = ({
+    className = "",
+    description,
+    countries,
+    filmLength,
+    genres,
+    ratingImdb,
+    ratingKinopoisk,
+    year
+}) => {
+    return <div className={"grid cols-2 gap-4 " + className}>
+        <p>Год: </p><p>{year}</p>
+        <p>Страна: </p><p>{countries?.map(({ country }) => country)?.join(', ')}</p>
+        <p>Продолжительность: </p><p>{filmLength} минут</p>
+        <p>Жанр: </p><p>{genres?.map(({ genre }) => genre)?.join(', ')}</p>
+        <p>Рейтинг: </p><p>КП: {ratingKinopoisk} &nbsp;&nbsp;&nbsp; IMDB: {ratingImdb}</p>
+        <p className="col-span-2">{description}</p>
+    </div>
 }
 
 export const FilmPage = () => {
     const { id } = useParams();
     const {
         isFilmDataLoading,
+        isBalancerFilmDataLoading,
         nameRu,
         nameOriginal,
         posterUrl,
-        stream,
-        thumbnails,
+        description,
+        countries,
+        filmLength,
+        genres,
+        ratingImdb,
+        ratingKinopoisk,
+        year,
         translators,
         selectedTranslator,
         updateSelectedTranslator,
@@ -122,12 +166,21 @@ export const FilmPage = () => {
         episodes,
         selectedSeasonEpisode,
         updateSelectedSeasonEpisode,
-    } = useFilm(id);
+    } = useFilm(id, getFilmStateFromStorage(id));
 
     const onEpisodeSelect = useCallback(async (season, episode) => {
-        await updateSelectedSeasonEpisode(season, episode);
-        //startPlaying()
+        updateSelectedSeasonEpisode(season, episode);
     }, [updateSelectedSeasonEpisode]);
+
+    const [openSeason, setOpenSeason] = useState(seasons?.[0]?.id || null);
+
+    useEffect(() => {
+        if (selectedSeasonEpisode?.season) {
+            setOpenSeason(selectedSeasonEpisode.season);
+        } else {
+            setOpenSeason(seasons?.[0]?.id || null);
+        }
+    }, [selectedSeasonEpisode, seasons]);
 
     return <>
         <div className="fixed z-0 top-0 left-0">
@@ -149,19 +202,35 @@ export const FilmPage = () => {
                 selected={selectedTranslator} 
                 onSelect={updateSelectedTranslator}
             />
+            {!!seasons?.length && <SeasonsList 
+                className="col-start-1 col-end-9"
+                seasons={seasons}
+                selectedSeason={openSeason}
+                onSelect={setOpenSeason}
+            />}
             <div 
                 id="player" 
                 className="shadow-lg rounded-xl ring-2 ring-white/5 overflow-hidden
                     col-start-1 col-end-9"
             />
-            <div className="player-selectors col-start-9 col-end-13">
-                <EpisodesAccordeon 
-                    seasons={seasons}
-                    episodes={episodes}
-                    currentSeasonEpisode={selectedSeasonEpisode}
-                    onSelect={onEpisodeSelect}
+            {!!episodes?.[openSeason] && <div className="shadow-lg col-start-9 col-end-13 h-0 min-h-full">
+                <EpisodesList 
+                    className="h-full"
+                    episodes={episodes?.[openSeason]}
+                    selectedEpisode={openSeason == selectedSeasonEpisode?.season ? selectedSeasonEpisode?.episode : null}
+                    onSelect={(episode) => updateSelectedSeasonEpisode(openSeason, episode)}
                 />
-            </div>
+            </div>}
+            <AdditionalInfo 
+                className="col-start-1 col-end-9 mt-8"
+                description={description}
+                countries={countries}
+                filmLength={filmLength}
+                genres={genres}
+                ratingImdb={ratingImdb}
+                ratingKinopoisk={ratingKinopoisk}
+                year={year}
+            />
         </div>
     </>
 }
