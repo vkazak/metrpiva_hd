@@ -91,6 +91,9 @@ export const useFilm = (id, initState) => {
     const getTranslatorToken = useCallback((translators, translatorId) => {
         return translators?.find(tr => tr.id == translatorId)?.token || null;
     }, []);
+    const checkIfEpisodeExists = useCallback((episodes, season, episode) => {
+        return !!episodes?.[season]?.find(ep => ep.id == episode);
+    }, []);
 
     useEffect(() => {
         const fetchFilmData = async () => {
@@ -158,6 +161,16 @@ export const useFilm = (id, initState) => {
 
     }, [id, isPlayerReady]);
 
+    useEffect(() => {
+        if (filmData) {
+            updateFilmStateInStorage({ 
+                id, 
+                poster: filmData.posterUrlPreview, 
+                name: filmData.nameRu || filmData.nameOriginal 
+            });
+        }
+    }, [filmData]);
+
     const updateSelectedTranslator = useCallback(async (translatorId) => {
         setIsBalancerFilmDataLoading(true);
         try {
@@ -171,7 +184,7 @@ export const useFilm = (id, initState) => {
             const hasSeasons = balancerDataNew?.seasons?.length;
             let seasonEpisodeWasLoaded = null;
             // If new translator has current episode loading this
-            const containsCurrentEpisode = balancerDataNew.episodes?.[selectedSeasonEpisode?.season]?.find(ep => ep.id == selectedSeasonEpisode?.episode);
+            const containsCurrentEpisode = checkIfEpisodeExists(balancerDataNew.episodes, selectedSeasonEpisode?.season, selectedSeasonEpisode?.episode);
             if (containsCurrentEpisode) {
                 balancerDataNew = await getBalancerFilmData({
                     id,
@@ -243,9 +256,19 @@ export const useFilm = (id, initState) => {
         }
     }, [id, selectedTranslator, balancerData]);
 
+    // Watching for 'end' event from player to switch episode to next if possible.
     useEffect(() => {
+        window.PlayerjsEvents = async (event, id, info) => {
+            if (event === 'end') {
+                const nextEpisodeInSeasonExists = checkIfEpisodeExists(balancerData.episodes, selectedSeasonEpisode?.season, selectedSeasonEpisode?.episode + 1);
 
-    }, []);
+                if (nextEpisodeInSeasonExists) {
+                    await updateSelectedSeasonEpisode(selectedSeasonEpisode.season, selectedSeasonEpisode.episode + 1);
+                    startPlaying();
+                }
+            }
+        }
+    }, [balancerData, selectedSeasonEpisode, updateSelectedSeasonEpisode, startPlaying]);
 
     return {
         isFilmDataLoading,

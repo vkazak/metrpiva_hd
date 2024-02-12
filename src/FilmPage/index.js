@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFilm } from "../hooks/useFilm"
 import { useParams } from "react-router-dom";
-import { Accordion, AccordionItem, Button, Divider, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
+import { Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
 import { getFilmStateFromStorage } from "../utils/localStorageUtils";
 
 const TranslatorsSelect = ({
@@ -46,73 +46,41 @@ const TranslatorsSelect = ({
     </Select>
 }
 
-const EpisodesAccordeon = ({ seasons, episodes, currentSeasonEpisode, onSelect }) => {
-    const [openSeason, setOpenSeason] = useState(seasons?.[0]?.id || null);
+const SeasonsList = ({ className, seasons, selectedSeason, onSelect }) => {
+    const seasonsRef = useRef();
 
     useEffect(() => {
-        if (currentSeasonEpisode?.season) {
-            setOpenSeason(currentSeasonEpisode.season);
-        } else {
-            setOpenSeason(seasons?.[0]?.id || null);
+        if (seasons && seasonsRef.current) {
+            const selectedSeasonElement = seasonsRef.current.querySelector(`button[data-key="${selectedSeason}"]`);
+            const selectedSeasonOffsetLeft = selectedSeasonElement?.offsetLeft - seasonsRef.current.offsetWidth / 2 + selectedSeasonElement?.offsetWidth / 2; 
+            seasonsRef.current.scrollLeft = selectedSeasonOffsetLeft;
         }
-    }, [currentSeasonEpisode, seasons, episodes]);
+    }, [seasons]);
 
-    if (!seasons?.length) {
-        return null;
-    }
-    /*
-    return <div className="backdrop-blur-sm shadow rounded">
-        <Accordion>
-            {seasons.map(season => (
-                <AccordionItem key={season.id} title={season.name}>
-                    <div className="">
-                        {episodes[season.id]?.map(episode => (
-                            <Button 
-                                key={episode.id} 
-                                variant={currentSeasonEpisode?.season == season.id && currentSeasonEpisode?.episode == episode.id ? 'shadow' : 'light'}
-                                radius='none'
-                                fullWidth
-                                onClick={() => onSelect(season.id, episode.id)}
-                            >
-                                {episode.name}
-                            </Button>
-                        ))}
-                    </div>
-                </AccordionItem>
-            ))}
-        </Accordion>
-         <ScrollShadow orientation="horizontal" className="flex no-wrap gap-1 mt-4 ring p-4" scroll>
-            {episodes[openSeason]?.map(episode => (
-                <Button 
-                    key={episode.id} 
-                    variant={currentSeasonEpisode?.season == openSeason && currentSeasonEpisode?.episode == episode.id ? 'shadow' : 'bordered'}
-                    radius='none'
-                    className="p-4 width"
-                    onClick={() => onSelect(openSeason, episode.id)}
-                >
-                    {episode.name}
-                </Button>
-            ))}
-        </ScrollShadow>
-    </div>*/
-
-}
-
-const SeasonsList = ({ className, seasons, selectedSeason, onSelect }) => {
-    return <ScrollShadow orientation="horizontal" className={className}>
+    return <ScrollShadow orientation="horizontal" className={"relative " + className} ref={seasonsRef}>
         <Tabs variant="underlined" onSelectionChange={onSelect} selectedKey={selectedSeason} className="mb-2">
             {seasons?.map(season => (
                 <Tab key={season.id} title={season.name} />
             ))}
         </Tabs>
     </ScrollShadow>
-}
+} 
 
 const EpisodesList = ({ className, episodes, selectedEpisode, onSelect }) => {
-    return <ScrollShadow hideScrollBar className={className}>
+    const episodesListRef = useRef();
+    const selectedEpisodeRef = useRef();
+    
+    useEffect(() => {
+        if (selectedEpisode && episodesListRef.current && selectedEpisodeRef.current) {
+            episodesListRef.current.scrollTop = selectedEpisodeRef.current.offsetTop - episodesListRef.current.offsetHeight / 2 + selectedEpisodeRef.current.offsetHeight / 2;
+        }
+    }, [selectedEpisode]);
+
+    return <ScrollShadow hideScrollBar className={"relative scroll-smooth " + className} ref={episodesListRef}>
         {episodes?.map(episode => (
             <Button 
                 key={episode.id} 
+                ref={selectedEpisode == episode.id ? selectedEpisodeRef : null}
                 variant={selectedEpisode == episode.id ? 'shadow' : 'light'}
                 radius='none'
                 fullWidth
@@ -168,10 +136,6 @@ export const FilmPage = () => {
         updateSelectedSeasonEpisode,
     } = useFilm(id, getFilmStateFromStorage(id));
 
-    const onEpisodeSelect = useCallback(async (season, episode) => {
-        updateSelectedSeasonEpisode(season, episode);
-    }, [updateSelectedSeasonEpisode]);
-
     const [openSeason, setOpenSeason] = useState(seasons?.[0]?.id || null);
 
     useEffect(() => {
@@ -181,6 +145,7 @@ export const FilmPage = () => {
             setOpenSeason(seasons?.[0]?.id || null);
         }
     }, [selectedSeasonEpisode, seasons]);
+
 
     return <>
         <div className="fixed z-0 top-0 left-0">
@@ -192,8 +157,13 @@ export const FilmPage = () => {
             <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-black"></div>
         </div>
         <div className="mt-6 relative z-10 grid grid-cols-12 gap-4">
-            <div className="col-start-1 col-end-10">
-                <h1 className="text-3xl">{nameRu}</h1>
+            <div className="col-start-1 col-end-9">
+                <div className="flex gap-6 items-center justify-between">
+                    <h1 className="text-3xl">{nameRu}</h1>
+                    {selectedSeasonEpisode?.episode && 
+                        <p>Сезон {selectedSeasonEpisode.season} | Серия {selectedSeasonEpisode.episode}</p>
+                    }
+                </div>
                 <h3 className="opacity-70">{nameOriginal}</h3>
             </div>
             <TranslatorsSelect 

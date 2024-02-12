@@ -26,7 +26,6 @@ export const useSearch = () => {
 
         try {
             const filmsResponse = await getFilmsByTerm(term);
-            console.log(filmsResponse)
             setSearchResults(filmsResponse.films);
             setSearchTerm(filmsResponse.keyword);
             setIsError(!filmsResponse.films)
