@@ -158,6 +158,16 @@ export const useFilm = (id, initState) => {
 
     }, [id, isPlayerReady]);
 
+    useEffect(() => {
+        if (filmData) {
+            updateFilmStateInStorage({ 
+                id, 
+                poster: filmData.posterUrlPreview, 
+                name: filmData.nameRu || filmData.nameOriginal 
+            });
+        }
+    }, [filmData]);
+
     const updateSelectedTranslator = useCallback(async (translatorId) => {
         setIsBalancerFilmDataLoading(true);
         try {

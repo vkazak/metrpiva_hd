@@ -52,7 +52,7 @@ const SeasonsList = ({ className, seasons, selectedSeason, onSelect }) => {
     useEffect(() => {
         if (seasons && seasonsRef.current) {
             const selectedSeasonElement = seasonsRef.current.querySelector(`button[data-key="${selectedSeason}"]`);
-            const selectedSeasonOffsetLeft = selectedSeasonElement.offsetLeft - seasonsRef.current.offsetWidth / 2 + selectedSeasonElement.offsetWidth / 2; 
+            const selectedSeasonOffsetLeft = selectedSeasonElement?.offsetLeft - seasonsRef.current.offsetWidth / 2 + selectedSeasonElement?.offsetWidth / 2; 
             seasonsRef.current.scrollLeft = selectedSeasonOffsetLeft;
         }
     }, [seasons]);

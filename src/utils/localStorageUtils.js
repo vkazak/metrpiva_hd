@@ -20,6 +20,8 @@ export const getFilmDataFromStorage = (id) => {
 
 export const updateFilmStateInStorage = ({
     id,
+    poster,
+    name,
     translatorId,
     season,
     episode,
@@ -30,6 +32,8 @@ export const updateFilmStateInStorage = ({
     
     const newState = {
         id,
+        poster: poster ? poster : state.poster,
+        name: name ? name : state.name,
         translatorId: translatorId ? translatorId : state.translatorId,
         season: season ? season : state.season,
         episode: episode ? episode : state.episode,
@@ -45,4 +49,18 @@ export const getFilmStateFromStorage = (id) => {
     const state = stateString ? JSON.parse(stateString) : null;
 
     return state;
+}
+
+export const getAllSavedStates = () => {
+    return Object.entries(localStorage)
+        .filter(([key]) => key.startsWith('state_'))
+        .map(([__, value]) => JSON.parse(value));
+}
+
+export const getLastSavedStates = () => {
+    const MAX_ITEMS_INCLUDE = 20;
+
+    return getAllSavedStates()
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, MAX_ITEMS_INCLUDE);
 }
