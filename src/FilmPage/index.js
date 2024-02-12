@@ -157,8 +157,13 @@ export const FilmPage = () => {
             <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-black"></div>
         </div>
         <div className="mt-6 relative z-10 grid grid-cols-12 gap-4">
-            <div className="col-start-1 col-end-10">
-                <h1 className="text-3xl">{nameRu}</h1>
+            <div className="col-start-1 col-end-9">
+                <div className="flex gap-6 items-center justify-between">
+                    <h1 className="text-3xl">{nameRu}</h1>
+                    {selectedSeasonEpisode?.episode && 
+                        <p>Сезон {selectedSeasonEpisode.season} | Серия {selectedSeasonEpisode.episode}</p>
+                    }
+                </div>
                 <h3 className="opacity-70">{nameOriginal}</h3>
             </div>
             <TranslatorsSelect 
