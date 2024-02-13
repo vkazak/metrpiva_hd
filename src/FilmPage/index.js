@@ -4,6 +4,7 @@ import { useFilm } from "../hooks/useFilm"
 import { useParams } from "react-router-dom";
 import { Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
 import { getFilmStateFromStorage } from "../utils/localStorageUtils";
+import { LoaderOverlay } from "../Loader";
 
 const TranslatorsSelect = ({
     className = '',
@@ -158,6 +159,7 @@ export const FilmPage = () => {
             <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-black"></div>
         </div>
         <div className="mt-6 relative z-10 grid grid-cols-12 gap-4">
+            {isFilmDataLoading && <LoaderOverlay />}
             <div className="col-start-1 col-end-9">
                 <h1 className="text-3xl">{nameRu}</h1>
                 <h3 className="opacity-70">{nameOriginal}</h3>
@@ -176,12 +178,18 @@ export const FilmPage = () => {
             />}
             {selectedSeasonEpisode?.episode && 
                 createPortal(
-                    <div className={`backdrop-blur-sm bg-black/50 absolute z-10 p-3 pr-5 rounded-br-full transition-opacity ${
+                    <div className={`backdrop-blur-sm bg-black/50 absolute z-10 p-3 pr-5 rounded-br-full transition-opacity shadow ${
                         isPlaying ? 'opacity-0' : ''}`}>
                         <p className="opacity-80 text-xs">
                             Сезон {selectedSeasonEpisode.season} | Серия {selectedSeasonEpisode.episode}
                         </p>
                     </div>,
+                    document.getElementById('oframeplayer')
+                )
+            }
+            {isBalancerFilmDataLoading && document.getElementById('oframeplayer') &&
+                createPortal(
+                    <LoaderOverlay />,
                     document.getElementById('oframeplayer')
                 )
             }

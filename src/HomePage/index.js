@@ -1,8 +1,9 @@
 import { Input } from "@nextui-org/react"
-import { useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useSearch } from "../hooks/useSearch";
 import { FilmCard } from "./FilmCard";
 import { ContinueWatching } from "./ContinueWatching";
+import { LoaderOverlay } from "../Loader";
 
 export const HomePage = () => {
     const [searchValue, setSearchValue] = useState("");
@@ -20,9 +21,23 @@ export const HomePage = () => {
         }
     }
 
+    const SearchInfoLabel = useCallback(() => {
+        if (!searchTerm) return <></>;
+
+        if (searchResults?.length > 0) {
+            return <p className="my-5">
+                Результаты поиска по запросу "{searchTerm}":
+            </p>
+        } else {
+            return <p className="text-center mt-10">
+                По запросу "{searchTerm}" ничего не найдено :(
+            </p>
+        }
+    }, [searchResults, searchTerm]);
+
     return <div className="home">
         <ContinueWatching />
-        <div className="flex items-center justify-center my-10">
+        <div className="flex items-center justify-center mt-10">
             <Input 
                 type="search"
                 radius="full"
@@ -32,7 +47,9 @@ export const HomePage = () => {
                 onKeyDown={handleKeyDown}
             />
         </div>
-        <div className="grid grid-cols-5 gap-10">
+        <SearchInfoLabel />
+        <div className="grid grid-cols-5 gap-10 relative min-h-28">
+            { searchInProgress && <LoaderOverlay /> }
             {
                 searchResults.map(film => (
                     <FilmCard 
