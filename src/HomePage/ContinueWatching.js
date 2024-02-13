@@ -6,8 +6,6 @@ import { FilmCard } from "./FilmCard";
 export const ContinueWatching = () => {
     const lastStates = useMemo(() => getLastSavedStates() || [], []);
 
-    console.log(lastStates);
-
     return !!lastStates?.length && <div>
         <h3 className="mt-6 text-2xl px-2">Продолжить: </h3>
         <ScrollShadow className="flex gap-10 py-6 px-2" orientation="horizontal">
