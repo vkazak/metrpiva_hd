@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 export const usePlayer = () => {
     const [isPlayerReady, setIsPlayerReady] = useState(false);
     const [player, setPlayer] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
         const script = document.createElement('script');
@@ -20,6 +21,13 @@ export const usePlayer = () => {
             document.body.removeChild(script);
         }
     }, []);
+
+    useEffect(() => {
+        if (player) {
+            addListener('play', () => setIsPlaying(true));
+            addListener('pause', () => setIsPlaying(false));
+        }
+    }, [player]);
 
     const setStream = useCallback(({ stream, thumbnails, cuid }) => {
         player?.api("preload", stream);
@@ -45,7 +53,11 @@ export const usePlayer = () => {
 
     const getIsPlaying = useCallback(() => {
         return player?.api("playing");
-    }, [player])
+    }, [player]);
+
+    const addListener = useCallback((type, fn) => {
+        document.getElementById('player')?.addEventListener?.(type, fn);
+    }, [player]);
 
     return {
         isPlayerReady,
@@ -54,5 +66,7 @@ export const usePlayer = () => {
         setTime,
         getTime,
         getIsPlaying,
+        isPlaying,
+        addListener,
     }
 }
