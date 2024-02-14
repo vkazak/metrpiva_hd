@@ -1,5 +1,5 @@
 import { Input } from "@nextui-org/react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useSearch } from "../hooks/useSearch";
 import { FilmCard } from "./FilmCard";
 import { ContinueWatching } from "./ContinueWatching";
@@ -35,9 +35,15 @@ export const HomePage = () => {
         }
     }, [searchResults, searchTerm]);
 
-    return <div className="home">
+    useEffect(() => {
+        if (searchResults?.length) {
+            document.getElementById('search').scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [searchResults]);
+
+    return <div className="home flex flex-col h-full">
         <ContinueWatching />
-        <div className="flex items-center justify-center mt-10">
+        <div id="search" className="flex items-center justify-center mt-10">
             <Input 
                 type="search"
                 radius="full"

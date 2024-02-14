@@ -16,6 +16,8 @@ export const ContinueWatching = () => {
                     id={filmState.id}
                     poster={filmState.poster}
                     name={filmState.name}
+                    seasonEpisode={filmState.episode ? 
+                        `Сезон ${filmState.season} | Серия ${filmState.episode}` : null }
                 />
             ))}
         </ScrollShadow>

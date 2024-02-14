@@ -9,7 +9,8 @@ export const FilmCard = ({
     poster, 
     name, 
     rating, 
-    year 
+    year,
+    seasonEpisode,
 }) => {
     let ratingColor;
 
@@ -33,5 +34,6 @@ export const FilmCard = ({
         </Card>
         <p className="text-md mt-2">{name}</p>
         {!!year && <p className="text-sm opacity-80">{year}</p>}
+        {!!seasonEpisode && <p className="text-sm opacity-80">{seasonEpisode}</p>}
     </Link>
 }
