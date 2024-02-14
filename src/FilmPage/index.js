@@ -94,6 +94,14 @@ const EpisodesList = ({ className, episodes, selectedEpisode, onSelect }) => {
     </ScrollShadow>
 }
 
+const usePageTitle = (filmName) => {
+    useEffect(() => {
+        if (filmName) {
+            document.title = `${filmName} - Metrpiva HD`;
+        }
+    }, [filmName]);
+}
+
 const AdditionalInfo = ({
     className = "",
     description,
@@ -138,6 +146,8 @@ export const FilmPage = () => {
         selectedSeasonEpisode,
         updateSelectedSeasonEpisode,
     } = useFilm(id, getFilmStateFromStorage(id));
+
+    usePageTitle(nameRu || nameOriginal);
 
     const [openSeason, setOpenSeason] = useState(seasons?.[0]?.id || null);
 
