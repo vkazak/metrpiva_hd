@@ -54,7 +54,7 @@ export const HomePage = () => {
             />
         </div>
         <SearchInfoLabel />
-        <div className="grid grid-cols-5 gap-10 relative min-h-28">
+        <div className="grid relative min-h-28 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 xl:gap-10">
             { searchInProgress && <LoaderOverlay /> }
             {
                 searchResults.map(film => (

@@ -170,18 +170,18 @@ export const FilmPage = () => {
         </div>
         <div className="mt-6 relative z-10 grid grid-cols-12 gap-4">
             {isFilmDataLoading && <LoaderOverlay />}
-            <div className="col-start-1 col-end-9">
+            <div className="col-start-1 col-end-13 sm:col-end-9">
                 <h1 className="text-3xl">{nameRu}</h1>
                 <h3 className="opacity-70">{nameOriginal}</h3>
             </div>
             <TranslatorsSelect 
-                className="col-start-1 col-end-4"
+                className="col-start-1 col-end-9 sm:col-end-4"
                 translators={translators} 
                 selected={selectedTranslator} 
                 onSelect={updateSelectedTranslator}
             />
             {!!seasons?.length && <SeasonsList 
-                className="col-start-1 col-end-9"
+                className="col-start-1 col-end-13 sm:col-end-9"
                 seasons={seasons}
                 selectedSeason={openSeason}
                 onSelect={setOpenSeason}
@@ -206,9 +206,10 @@ export const FilmPage = () => {
             <div 
                 id="player" 
                 className="shadow-lg rounded-xl ring-2 ring-white/5 overflow-hidden
-                    col-start-1 col-end-9"
+                    col-start-1 col-end-13 sm:col-end-9"
             />
-            {!!episodes?.[openSeason] && <div className="shadow-lg col-start-9 col-end-13 h-0 min-h-full">
+            {!!episodes?.[openSeason] && <div className="shadow-lg max-h-48 sm:h-0 sm:min-h-full 
+                col-start-1 sm:col-start-9 col-end-13">
                 <EpisodesList 
                     className="h-full"
                     episodes={episodes?.[openSeason]}
@@ -217,7 +218,7 @@ export const FilmPage = () => {
                 />
             </div>}
             <AdditionalInfo 
-                className="col-start-1 col-end-9 mt-8"
+                className="col-start-1 col-end-12 sm:col-end-9 mt-4 sm:mt-8"
                 description={description}
                 countries={countries}
                 filmLength={filmLength}

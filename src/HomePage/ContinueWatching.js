@@ -7,11 +7,11 @@ export const ContinueWatching = () => {
     const lastStates = useMemo(() => getLastSavedStates() || [], []);
 
     return !!lastStates?.length && <div>
-        <h3 className="text-2xl px-2">Продолжить: </h3>
-        <ScrollShadow className="flex gap-10 py-6 px-2" orientation="horizontal">
+        <h3 className="px-2 text sm:text-xl">Продолжить: </h3>
+        <ScrollShadow className="flex py-6 px-2 gap-5 sm:gap-10" orientation="horizontal">
             {lastStates.map(filmState => (
                 <FilmCard
-                    className="w-[200px]"
+                    className="w-[100px] sm:w-[200px]"
                     key={filmState.id}
                     id={filmState.id}
                     poster={filmState.poster}
