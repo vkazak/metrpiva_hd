@@ -32,8 +32,8 @@ export const FilmCard = ({
                 src={poster}
             />
         </Card>
-        <p className="text-md mt-2">{name}</p>
-        {!!year && <p className="text-sm opacity-80">{year}</p>}
-        {!!seasonEpisode && <p className="text-sm opacity-80">{seasonEpisode}</p>}
+        <p className="mt-2 text-sm">{name}</p>
+        {!!year && <p className="opacity-80 text-xs">{year}</p>}
+        {!!seasonEpisode && <p className="opacity-80 text-xs">{seasonEpisode}</p>}
     </Link>
 }

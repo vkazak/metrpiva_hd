@@ -10,7 +10,8 @@ const TranslatorsSelect = ({
     className = '',
     translators = [],
     selected,
-    onSelect
+    onSelect,
+    isDisabled
 }) => {
     const translatorsExtenedList = useMemo(() => {
         if (selected == '') {
@@ -33,6 +34,7 @@ const TranslatorsSelect = ({
 
     return <Select 
         className={"shadow " + className}
+        isDisabled={isDisabled}
         label="Перевод" 
         variant="bordered"
         selectionMode="single"
@@ -122,11 +124,23 @@ const AdditionalInfo = ({
     </div>
 }
 
+const PosterImage = ({ url }) => {
+    return <div className="fixed z-0 top-0 left-0">
+        <Image 
+            src={url}
+            radius="none"
+            className="data-[loaded=true]:opacity-30 min-h-dvh object-cover z-0"
+        />
+        <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-black"></div>
+    </div>
+}
+
 export const FilmPage = () => {
     const { id } = useParams();
     const {
         isFilmDataLoading,
         isBalancerFilmDataLoading,
+        isError,
         isPlaying,
         nameRu,
         nameOriginal,
@@ -150,6 +164,7 @@ export const FilmPage = () => {
     usePageTitle(nameRu || nameOriginal);
 
     const [openSeason, setOpenSeason] = useState(seasons?.[0]?.id || null);
+    const hasSeasons = useMemo(() => !!seasons?.length, [seasons]);
 
     useEffect(() => {
         if (selectedSeasonEpisode?.season) {
@@ -160,28 +175,24 @@ export const FilmPage = () => {
     }, [selectedSeasonEpisode, seasons]);
 
     return <>
-        <div className="fixed z-0 top-0 left-0">
-            <Image 
-                src={posterUrl}
-                radius="none"
-                className="data-[loaded=true]:opacity-30 z-0"
-            />
-            <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-black"></div>
-        </div>
+        <PosterImage url={posterUrl} />
         <div className="mt-6 relative z-10 grid grid-cols-12 gap-4">
             {isFilmDataLoading && <LoaderOverlay />}
-            <div className="col-start-1 col-end-9">
+            <div className={`col-start-1 col-end-13 transition-all 
+                ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}`}>
                 <h1 className="text-3xl">{nameRu}</h1>
                 <h3 className="opacity-70">{nameOriginal}</h3>
             </div>
             <TranslatorsSelect 
-                className="col-start-1 col-end-4"
+                className={`col-start-1 col-end-9 
+                    ${hasSeasons ? 'sm:col-end-4' : 'sm:col-start-3 sm:col-end-6'}`}
                 translators={translators} 
+                isDisabled={isBalancerFilmDataLoading}
                 selected={selectedTranslator} 
                 onSelect={updateSelectedTranslator}
             />
-            {!!seasons?.length && <SeasonsList 
-                className="col-start-1 col-end-9"
+            {hasSeasons && <SeasonsList 
+                className="col-start-1 col-end-13 sm:col-end-9"
                 seasons={seasons}
                 selectedSeason={openSeason}
                 onSelect={setOpenSeason}
@@ -205,10 +216,15 @@ export const FilmPage = () => {
             }
             <div 
                 id="player" 
-                className="shadow-lg rounded-xl ring-2 ring-white/5 overflow-hidden
-                    col-start-1 col-end-9"
+                className={`shadow-lg rounded-xl ring-2 ring-white/5 overflow-hidden
+                    col-start-1 col-end-13 ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}
+                    ${isError && 'hidden'}`}
             />
-            {!!episodes?.[openSeason] && <div className="shadow-lg col-start-9 col-end-13 h-0 min-h-full">
+            {isError && <p className="py-20 text-center text-2xl opacity-80 col-start-1 col-end-13 sm:col-start-3 sm:col-end-11">
+                Похоже этого фильма нет в базе балансёра. Либо произошла ошибка при загрузке :(   
+            </p>}
+            {!!episodes?.[openSeason] && <div className="shadow-lg max-h-48 sm:h-0 sm:min-h-full 
+                col-start-1 sm:col-start-9 col-end-13">
                 <EpisodesList 
                     className="h-full"
                     episodes={episodes?.[openSeason]}
@@ -217,7 +233,8 @@ export const FilmPage = () => {
                 />
             </div>}
             <AdditionalInfo 
-                className="col-start-1 col-end-9 mt-8"
+                className={`col-start-1 col-end-12 mt-4 sm:mt-8
+                    ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}`}
                 description={description}
                 countries={countries}
                 filmLength={filmLength}
