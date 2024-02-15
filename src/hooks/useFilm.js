@@ -85,6 +85,7 @@ export const useFilm = (id, initState) => {
 
     const [isFilmDataLoading, setIsFilmDataLoading] = useState(true);
     const [isBalancerFilmDataLoading, setIsBalancerFilmDataLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
     const [filmData, setFilmData] = useState({});
     const [balancerData, setBalancerData] = useState({});
     const [selectedTranslator, setSelectedTranslator] = useState('');
@@ -104,6 +105,7 @@ export const useFilm = (id, initState) => {
                 setFilmData(await getFilmData(id));
             } catch (err) {
                 console.error(err);
+                setIsError(true);
             } finally {
                 setIsFilmDataLoading(false);
             }
@@ -152,6 +154,7 @@ export const useFilm = (id, initState) => {
                 });
             } catch (err) {
                 console.error(err);
+                setIsError(true);
             } finally {
                 setIsBalancerFilmDataLoading(false);
             }
@@ -227,6 +230,7 @@ export const useFilm = (id, initState) => {
             }
         } catch (err) {
             console.error(err);
+            setIsError(true);
         } finally {
             setIsBalancerFilmDataLoading(false);
         }
@@ -253,6 +257,7 @@ export const useFilm = (id, initState) => {
             });
         } catch (err) {
             console.error(err);
+            setIsError(true);
         } finally {
             setIsBalancerFilmDataLoading(false);
         }
@@ -275,6 +280,7 @@ export const useFilm = (id, initState) => {
     return {
         isFilmDataLoading,
         isBalancerFilmDataLoading,
+        isError,
         isPlaying,
         ...filmData,
         ...balancerData,

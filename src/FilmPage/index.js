@@ -140,6 +140,7 @@ export const FilmPage = () => {
     const {
         isFilmDataLoading,
         isBalancerFilmDataLoading,
+        isError,
         isPlaying,
         nameRu,
         nameOriginal,
@@ -216,8 +217,12 @@ export const FilmPage = () => {
             <div 
                 id="player" 
                 className={`shadow-lg rounded-xl ring-2 ring-white/5 overflow-hidden
-                    col-start-1 col-end-13 ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}`}
+                    col-start-1 col-end-13 ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}
+                    ${isError && 'hidden'}`}
             />
+            {isError && <p className="py-20 text-center text-2xl opacity-80 col-start-1 col-end-13 sm:col-start-3 sm:col-end-11">
+                Похоже этого фильма нет в базе балансёра. Либо произошла ошибка при загрузке :(   
+            </p>}
             {!!episodes?.[openSeason] && <div className="shadow-lg max-h-48 sm:h-0 sm:min-h-full 
                 col-start-1 sm:col-start-9 col-end-13">
                 <EpisodesList 
