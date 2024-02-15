@@ -124,6 +124,17 @@ const AdditionalInfo = ({
     </div>
 }
 
+const PosterImage = ({ url }) => {
+    return <div className="fixed z-0 top-0 left-0">
+        <Image 
+            src={url}
+            radius="none"
+            className="data-[loaded=true]:opacity-30 min-h-dvh object-cover z-0"
+        />
+        <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-black"></div>
+    </div>
+}
+
 export const FilmPage = () => {
     const { id } = useParams();
     const {
@@ -163,14 +174,7 @@ export const FilmPage = () => {
     }, [selectedSeasonEpisode, seasons]);
 
     return <>
-        <div className="fixed z-0 top-0 left-0">
-            <Image 
-                src={posterUrl}
-                radius="none"
-                className="data-[loaded=true]:opacity-30 z-0"
-            />
-            <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-black"></div>
-        </div>
+        <PosterImage url={posterUrl} />
         <div className="mt-6 relative z-10 grid grid-cols-12 gap-4">
             {isFilmDataLoading && <LoaderOverlay />}
             <div className={`col-start-1 col-end-13 transition-all 
