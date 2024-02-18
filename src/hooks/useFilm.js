@@ -212,9 +212,13 @@ export const useFilm = (id, initState) => {
             }
             setBalancerData(balancerDataNew);
             setSelectedTranslator(translatorId);
-            updateFilmStateInStorage({ id, translatorId, season: seasonEpisodeWasLoaded.season, episode: seasonEpisodeWasLoaded.episode });
+            updateFilmStateInStorage({ 
+                id, 
+                translatorId, 
+                season: seasonEpisodeWasLoaded?.season, 
+                episode: seasonEpisodeWasLoaded?.episode 
+            });
     
-            // TODO: logic when episode isn't found
             const currentPlayTime = getTime();
             const isPlaying = getIsPlaying();
 
@@ -224,7 +228,9 @@ export const useFilm = (id, initState) => {
                 stream: balancerDataNew.stream, 
                 thumbnails: balancerDataNew.thumbnails
             });
-            setTime(currentPlayTime);
+            if (containsCurrentEpisode || !hasSeasons) {
+                setTime(currentPlayTime);
+            }
             if ((containsCurrentEpisode || !hasSeasons) && isPlaying) {
                 startPlaying();
             }
