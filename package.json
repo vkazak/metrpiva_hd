@@ -1,6 +1,6 @@
 {
     "name": "metrpiva_hd",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "private": true,
     "dependencies": {
         "@nextui-org/react": "^2.2.9",
