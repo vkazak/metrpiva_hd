@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
 import { getFilmStateFromStorage } from "../utils/localStorageUtils";
 import { LoaderOverlay } from "../Loader";
+import { hitPageLoad } from "../utils/ym";
 
 const TranslatorsSelect = ({
     className = '',
@@ -96,10 +97,20 @@ const EpisodesList = ({ className, episodes, selectedEpisode, onSelect }) => {
     </ScrollShadow>
 }
 
+const getPageTitle = (filmName) => `${filmName} - Metrpiva HD`;
+
 const usePageTitle = (filmName) => {
     useEffect(() => {
         if (filmName) {
-            document.title = `${filmName} - Metrpiva HD`;
+            document.title = getPageTitle(filmName);
+        }
+    }, [filmName]);
+}
+
+const useHitFilmPageLoad = (filmName) => {
+    useEffect(() => {
+        if (filmName) {
+            hitPageLoad(document.location.pathname, getPageTitle(filmName))
         }
     }, [filmName]);
 }
@@ -162,6 +173,7 @@ export const FilmPage = () => {
     } = useFilm(id, getFilmStateFromStorage(id));
 
     usePageTitle(nameRu || nameOriginal);
+    useHitFilmPageLoad(nameRu || nameOriginal);
 
     const [openSeason, setOpenSeason] = useState(seasons?.[0]?.id || null);
     const hasSeasons = useMemo(() => !!seasons?.length, [seasons]);
