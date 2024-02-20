@@ -1,4 +1,8 @@
-const EXPIRE_MS = 86400000; // 1 day
+const DAY_MS = 86400000; // 1 day in ms
+const FILM_CACHE_EXPIRE_MS = DAY_MS; 
+const CLEAR_STORAGE_PERIOD = 3 * DAY_MS;
+
+const MAX_ITEMS_IN_CONTINUE = 20;
 
 export const saveFilmDataToStorage = (data) => {
     localStorage.setItem(`film_${data.kinopoiskId}`, JSON.stringify({
@@ -11,7 +15,7 @@ export const getFilmDataFromStorage = (id) => {
     const dataString = localStorage.getItem(`film_${id}`);
     const data = dataString ? JSON.parse(dataString) : null;
 
-    if (data?.timestamp && Date.now() - data.timestamp < EXPIRE_MS) {
+    if (data?.timestamp && Date.now() - data.timestamp < FILM_CACHE_EXPIRE_MS) {
         return data
     } else {
         return null;
@@ -58,9 +62,55 @@ export const getAllSavedStates = () => {
 }
 
 export const getLastSavedStates = () => {
-    const MAX_ITEMS_INCLUDE = 20;
-
     return getAllSavedStates()
         .sort((a, b) => b.timestamp - a.timestamp)
-        .slice(0, MAX_ITEMS_INCLUDE);
+        .slice(0, MAX_ITEMS_IN_CONTINUE);
+}
+
+export const validateAndClearLocalStorage = () => {
+    const lastClearTimestamp = localStorage.getItem('last_clear');
+    const timestampNow = Date.now();
+    const isClearingNeeded = !lastClearTimestamp || (timestampNow - lastClearTimestamp > CLEAR_STORAGE_PERIOD);
+
+    if (isClearingNeeded) {
+        const filmKeys = [], stateKeys = [], pljsKeys = [];
+
+        Object.keys(localStorage)
+            .forEach((key) => {
+                if (key.startsWith('film_')) {
+                    filmKeys.push(key);
+                } else if (key.startsWith('state_')) {
+                    stateKeys.push(key);
+                } else if (key.startsWith('pljsplayfrom_')) {
+                    pljsKeys.push(key);
+                }
+            });
+        
+        filmKeys.forEach(filmKey => {
+            const filmCache = JSON.parse(localStorage.getItem(filmKey));
+            if (timestampNow - filmCache.timestamp > FILM_CACHE_EXPIRE_MS) {
+                localStorage.removeItem(filmKey);
+                console.log(`Film cache cleared for: ${filmCache.kinopoiskId} | ${filmCache.nameRu || filmCache.nameOriginal}`);
+            }
+        });
+
+        const lastSavedStates = getLastSavedStates();
+
+        const clearPlJsCacheById = (id) => {
+            pljsKeys.forEach(pljsKey => {
+                if (pljsKey.includes(`cuid-${id}-`)) {
+                    localStorage.removeItem(pljsKey);
+                }
+            })
+        }
+
+        stateKeys.forEach(stateKey => {
+            const curState = JSON.parse(localStorage.getItem(stateKey));
+            if (!lastSavedStates.find(st => st.id === curState.id)) {
+                localStorage.removeItem(stateKey);
+                clearPlJsCacheById(curState.id);
+                console.log(`Film state cleared for:  ${curState.id} | ${curState.name}`);
+            }
+        })
+    }
 }
