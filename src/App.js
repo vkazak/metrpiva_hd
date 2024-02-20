@@ -20,7 +20,11 @@ const router = createBrowserRouter([
 
 const App = () => {
     useEffect(() => {
-        validateAndClearLocalStorage();
+        try {
+            validateAndClearLocalStorage();
+        } catch (err) {
+            console.error('Error happened while clearing storage ', err);
+        }
     }, []);
     return (
         <>

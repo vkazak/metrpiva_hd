@@ -111,6 +111,8 @@ export const validateAndClearLocalStorage = () => {
                 clearPlJsCacheById(curState.id);
                 console.log(`Film state cleared for:  ${curState.id} | ${curState.name}`);
             }
-        })
+        });
+
+        localStorage.setItem('last_clear', timestampNow);
     }
 }
