@@ -4,6 +4,7 @@ import { useSearch } from "../hooks/useSearch";
 import { FilmCard } from "./FilmCard";
 import { ContinueWatching } from "./ContinueWatching";
 import { LoaderOverlay } from "../Loader";
+import { hitPageLoad } from "../utils/ym";
 
 export const HomePage = () => {
     const [searchValue, setSearchValue] = useState("");
@@ -14,6 +15,10 @@ export const HomePage = () => {
         searchTerm,
         updateSearchResults
     } = useSearch();
+
+    useEffect(() => {
+        hitPageLoad(document.location.pathname, document.title);
+    }, []);
 
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {

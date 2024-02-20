@@ -1,8 +1,11 @@
+import { useEffect } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { HomePage } from "./HomePage";
 import { Header } from "./Header";
 import { FilmPage } from "./FilmPage";
 import { Footer } from "./Footer";
+
+import { validateAndClearLocalStorage } from "./utils/localStorageUtils";
 
 const router = createBrowserRouter([
     {
@@ -16,6 +19,13 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
+    useEffect(() => {
+        try {
+            validateAndClearLocalStorage();
+        } catch (err) {
+            console.error('Error happened while clearing storage ', err);
+        }
+    }, []);
     return (
         <>
             <Header/>
