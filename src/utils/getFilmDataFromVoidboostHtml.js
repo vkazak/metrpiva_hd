@@ -1,5 +1,5 @@
 import { VOIDBOOST_URL } from "../Constants";
-import { decodeUrl } from "./decodeUrl";
+import { decodeUrl } from "./decodeUrlVoidboost";
 
 const getEncodedFile = (html) => {
     return html.match(/'#2.+?'/s)?.[0]?.replaceAll("'", "") || null;
