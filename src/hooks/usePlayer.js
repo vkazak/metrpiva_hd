@@ -22,12 +22,20 @@ export const usePlayer = () => {
         }
     }, []);
 
+    const addListener = useCallback((type, fn) => {
+        document.getElementById('player')?.addEventListener?.(type, fn);
+    }, []);
+
+    const removeListener = useCallback((type, fn) => {
+        document.getElementById('player')?.removeEventListener?.(type, fn);
+    }, []);
+
     useEffect(() => {
         if (player) {
             addListener('play', () => setIsPlaying(true));
             addListener('pause', () => setIsPlaying(false));
         }
-    }, [player]);
+    }, [player, addListener]);
 
     const setStream = useCallback(({ stream, thumbnails, cuid }) => {
         player?.api("preload", stream);
@@ -55,10 +63,6 @@ export const usePlayer = () => {
         return player?.api("playing");
     }, [player]);
 
-    const addListener = useCallback((type, fn) => {
-        document.getElementById('player')?.addEventListener?.(type, fn);
-    }, [player]);
-
     return {
         isPlayerReady,
         setStream,
@@ -68,5 +72,6 @@ export const usePlayer = () => {
         getIsPlaying,
         isPlaying,
         addListener,
+        removeListener,
     }
 }

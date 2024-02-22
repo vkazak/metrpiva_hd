@@ -81,6 +81,7 @@ export const useFilm = (id, initState) => {
         getIsPlaying,
         isPlaying,
         addListener,
+        removeListener
     } = usePlayer();
 
     const [isFilmDataLoading, setIsFilmDataLoading] = useState(true);
@@ -272,15 +273,17 @@ export const useFilm = (id, initState) => {
     // Watching for 'end' event from player to switch episode to next if possible.
     useEffect(() => {
         const loadAndStartNextEpisodeIfExists = async () => {
-            const nextEpisodeInSeasonExists = checkIfEpisodeExists(balancerData.episodes, selectedSeasonEpisode?.season, selectedSeasonEpisode?.episode + 1);
+            const nextEpisodeInSeasonExists = checkIfEpisodeExists(balancerData.episodes, selectedSeasonEpisode?.season, +selectedSeasonEpisode?.episode + 1);
             
             if (nextEpisodeInSeasonExists) {
-                await updateSelectedSeasonEpisode(selectedSeasonEpisode.season, selectedSeasonEpisode.episode + 1);
-                startPlaying();
+                await updateSelectedSeasonEpisode(selectedSeasonEpisode.season, +selectedSeasonEpisode.episode + 1);
+                setTimeout(startPlaying, 500);
             }
         }
                 
         addListener('end', loadAndStartNextEpisodeIfExists);
+
+        return () => removeListener('end', loadAndStartNextEpisodeIfExists);
     }, [balancerData, selectedSeasonEpisode, updateSelectedSeasonEpisode, startPlaying]);
 
     return {
