@@ -245,7 +245,7 @@ export const useFilm = (id, initState) => {
     const updateSelectedSeasonEpisode = useCallback(async (season, episode) => {
         setIsBalancerFilmDataLoading(true);
         try {
-            const translatorToken = getTranslatorToken(balancerData.translator, selectedTranslator);
+            const translatorToken = getTranslatorToken(balancerData.translators, selectedTranslator);
             let balancerDataNew = await getBalancerFilmData({ 
                 id,
                 token: translatorToken, 
