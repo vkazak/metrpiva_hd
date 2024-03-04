@@ -1,5 +1,5 @@
 const DAY_MS = 86400000; // 1 day in ms
-const FILM_CACHE_EXPIRE_MS = DAY_MS; 
+const FILM_CACHE_EXPIRE_MS = 3 * DAY_MS; 
 const CLEAR_STORAGE_PERIOD = 3 * DAY_MS;
 
 const MAX_ITEMS_IN_CONTINUE = 20;
