@@ -259,7 +259,7 @@ export const useFilm = (id, initState) => {
             updateFilmStateInStorage({ id, season, episode });
             setStream({
                 stream: balancerDataNew.stream, 
-                episode: balancerDataNew.thumbnails,
+                thumbnails: balancerDataNew.thumbnails,
                 cuid: makeCUID(id, season, episode)
             });
         } catch (err) {
