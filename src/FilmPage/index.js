@@ -6,6 +6,7 @@ import { Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nex
 import { getFilmStateFromStorage } from "../utils/localStorageUtils";
 import { LoaderOverlay } from "../Loader";
 import { hitPageLoad } from "../utils/ym";
+import { SequelsAndPrequels } from "./SequelsAndPrequels";
 
 const TranslatorsSelect = ({
     className = '',
@@ -163,6 +164,7 @@ export const FilmPage = () => {
         ratingImdb,
         ratingKinopoisk,
         year,
+        sequelsAndPrequels,
         translators,
         selectedTranslator,
         updateSelectedTranslator,
@@ -185,6 +187,10 @@ export const FilmPage = () => {
             setOpenSeason(seasons?.[0]?.id || null);
         }
     }, [selectedSeasonEpisode, seasons]);
+
+    useEffect(() => {
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }, [id]);
 
     return <>
         <PosterImage url={posterUrl} />
@@ -254,6 +260,10 @@ export const FilmPage = () => {
                 ratingImdb={ratingImdb}
                 ratingKinopoisk={ratingKinopoisk}
                 year={year}
+            />
+            <SequelsAndPrequels 
+                className="col-start-1 col-end-12 mt-2"
+                sequelsAndPrequels={sequelsAndPrequels} 
             />
         </div>
     </>

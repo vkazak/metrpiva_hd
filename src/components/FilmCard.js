@@ -1,5 +1,5 @@
 import React from "react"
-import { Card, CardFooter } from "@nextui-org/card";
+import { Card } from "@nextui-org/card";
 import { Image } from "@nextui-org/image";
 import { Link } from "react-router-dom";
 

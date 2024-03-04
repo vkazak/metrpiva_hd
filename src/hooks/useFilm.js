@@ -120,6 +120,7 @@ export const useFilm = (id, initState) => {
     // This useEffect is responsible for init loading of film data from voidboost
     useEffect(() => {
         const fetchBalancerData = async () => {
+            setIsError(false);
             setIsBalancerFilmDataLoading(true);
             try {
                 let balancerDataResponse = await getBalancerFilmData({ id });
