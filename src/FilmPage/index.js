@@ -6,6 +6,7 @@ import { Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nex
 import { getFilmStateFromStorage } from "../utils/localStorageUtils";
 import { LoaderOverlay } from "../Loader";
 import { hitPageLoad } from "../utils/ym";
+import { SequelsAndPrequels } from "./SequelsAndPrequels";
 
 const TranslatorsSelect = ({
     className = '',
@@ -14,8 +15,8 @@ const TranslatorsSelect = ({
     onSelect,
     isDisabled
 }) => {
-    const translatorsExtenedList = useMemo(() => {
-        if (selected == '') {
+    const translatorsExtendedList = useMemo(() => {
+        if (selected === '') {
             return [
                 { id: '', token: '', name: "По умолчанию" },
                 ...translators
@@ -44,7 +45,7 @@ const TranslatorsSelect = ({
         onChange={onChange}
     >
         {
-            translatorsExtenedList.map(translator => (<SelectItem key={translator.id}>
+            translatorsExtendedList.map(translator => (<SelectItem key={translator.id}>
                 {translator.name}
             </SelectItem>))
         }
@@ -60,10 +61,10 @@ const SeasonsList = ({ className, seasons, selectedSeason, onSelect }) => {
             const selectedSeasonOffsetLeft = selectedSeasonElement?.offsetLeft - seasonsRef.current.offsetWidth / 2 + selectedSeasonElement?.offsetWidth / 2; 
             seasonsRef.current.scrollLeft = selectedSeasonOffsetLeft;
         }
-    }, [seasons]);
+    }, [seasons, selectedSeason]);
 
     return <ScrollShadow orientation="horizontal" className={"relative " + className} ref={seasonsRef}>
-        <Tabs variant="underlined" onSelectionChange={onSelect} selectedKey={selectedSeason} className="mb-2">
+        <Tabs variant="underlined" onSelectionChange={key => onSelect(+key)} selectedKey={selectedSeason?.toString()} className="mb-2">
             {seasons?.map(season => (
                 <Tab key={season.id} title={season.name} />
             ))}
@@ -85,8 +86,8 @@ const EpisodesList = ({ className, episodes, selectedEpisode, onSelect }) => {
         {episodes?.map(episode => (
             <Button 
                 key={episode.id} 
-                ref={selectedEpisode == episode.id ? selectedEpisodeRef : null}
-                variant={selectedEpisode == episode.id ? 'shadow' : 'light'}
+                ref={selectedEpisode === episode.id ? selectedEpisodeRef : null}
+                variant={selectedEpisode === episode.id ? 'shadow' : 'light'}
                 radius='none'
                 fullWidth
                 onClick={() => onSelect(episode.id)}
@@ -148,6 +149,10 @@ const PosterImage = ({ url }) => {
 
 export const FilmPage = () => {
     const { id } = useParams();
+    const initFilmStateFromStorage = useMemo(
+        () => getFilmStateFromStorage(id), 
+        [id]
+    );
     const {
         isFilmDataLoading,
         isBalancerFilmDataLoading,
@@ -163,6 +168,7 @@ export const FilmPage = () => {
         ratingImdb,
         ratingKinopoisk,
         year,
+        sequelsAndPrequels,
         translators,
         selectedTranslator,
         updateSelectedTranslator,
@@ -170,7 +176,7 @@ export const FilmPage = () => {
         episodes,
         selectedSeasonEpisode,
         updateSelectedSeasonEpisode,
-    } = useFilm(id, getFilmStateFromStorage(id));
+    } = useFilm(id, initFilmStateFromStorage);
 
     usePageTitle(nameRu || nameOriginal);
     useHitFilmPageLoad(nameRu || nameOriginal);
@@ -185,6 +191,10 @@ export const FilmPage = () => {
             setOpenSeason(seasons?.[0]?.id || null);
         }
     }, [selectedSeasonEpisode, seasons]);
+
+    useEffect(() => {
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }, [id]);
 
     return <>
         <PosterImage url={posterUrl} />
@@ -240,7 +250,7 @@ export const FilmPage = () => {
                 <EpisodesList 
                     className="h-full"
                     episodes={episodes?.[openSeason]}
-                    selectedEpisode={openSeason == selectedSeasonEpisode?.season ? selectedSeasonEpisode?.episode : null}
+                    selectedEpisode={openSeason === selectedSeasonEpisode?.season ? selectedSeasonEpisode?.episode : null}
                     onSelect={(episode) => updateSelectedSeasonEpisode(openSeason, episode)}
                 />
             </div>}
@@ -254,6 +264,10 @@ export const FilmPage = () => {
                 ratingImdb={ratingImdb}
                 ratingKinopoisk={ratingKinopoisk}
                 year={year}
+            />
+            <SequelsAndPrequels 
+                className="col-start-1 col-end-12 mt-2"
+                sequelsAndPrequels={sequelsAndPrequels} 
             />
         </div>
     </>

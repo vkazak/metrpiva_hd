@@ -1,5 +1,5 @@
 export const Loader = () => {
-    return <img className='max-h-28' src='/loader.svg' />
+    return <img className='max-h-28' src='/loader.svg' alt='Loader' />
 }
 
 export const LoaderOverlay = () => {

@@ -23,6 +23,7 @@ export const useSearch = () => {
     
     const updateSearchResults = async (term) => {
         setSearchInProgress(true);
+        setIsError(false);
 
         try {
             const filmsResponse = await getFilmsByTerm(term);
@@ -31,12 +32,14 @@ export const useSearch = () => {
             setIsError(!filmsResponse.films)
         } catch (err) {
             console.error(err);
+            setIsError(true);
         } finally {
             setSearchInProgress(false);
         }
     }
 
     return {
+        isError,
         searchTerm,
         searchInProgress,
         searchResults,
