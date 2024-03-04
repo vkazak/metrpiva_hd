@@ -23,17 +23,19 @@ export const FilmCard = ({
     }
 
     return <Link className="block hover:scale-105 transition-all h-fit" to={`/watch/${id}`}>
-        <Card className={"shadow " + className}>
-            { rating && rating != 'null' && <div className={`absolute top-0 right-4 ${ratingColor} z-20 shadow-lg`}>
-                <p className="p-2 text-lg">{rating}</p>
-            </div> }
-            <Image 
-                className="w-96 h-auto object-cover aspect-[2/3]"
-                src={poster}
-            />
-        </Card>
-        <p className="mt-2 text-sm">{name}</p>
-        {!!year && <p className="opacity-80 text-xs">{year}</p>}
-        {!!seasonEpisode && <p className="opacity-80 text-xs">{seasonEpisode}</p>}
+        <div className={className}>
+            <Card className="shadow">
+                { rating && rating != 'null' && <div className={`absolute top-0 right-4 ${ratingColor} z-20 shadow-lg`}>
+                    <p className="p-2 text-lg">{rating}</p>
+                </div> }
+                <Image 
+                    className="w-96 h-auto object-cover aspect-[2/3]"
+                    src={poster}
+                />
+            </Card>
+            <p className="mt-2 text-sm">{name}</p>
+            {!!year && <p className="opacity-80 text-xs">{year}</p>}
+            {!!seasonEpisode && <p className="opacity-80 text-xs">{seasonEpisode}</p>}
+        </div>
     </Link>
 }

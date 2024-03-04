@@ -11,7 +11,7 @@ export const ContinueWatching = () => {
         <ScrollShadow className="flex py-6 px-2 gap-5 sm:gap-10" orientation="horizontal">
             {lastStates.map(filmState => (
                 <FilmCard
-                    className="w-[100px] sm:w-[200px]"
+                    className="w-[150px] sm:w-[200px]"
                     key={filmState.id}
                     id={filmState.id}
                     poster={filmState.poster}
