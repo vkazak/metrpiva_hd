@@ -25,7 +25,7 @@ export const FilmCard = ({
     return <Link className="block hover:scale-105 transition-all h-fit" to={`/watch/${id}`}>
         <div className={className}>
             <Card className="shadow">
-                { rating && rating != 'null' && <div className={`absolute top-0 right-4 ${ratingColor} z-20 shadow-lg`}>
+                { rating && rating !== 'null' && <div className={`absolute top-0 right-4 ${ratingColor} z-20 shadow-lg`}>
                     <p className="p-2 text-lg">{rating}</p>
                 </div> }
                 <Image 

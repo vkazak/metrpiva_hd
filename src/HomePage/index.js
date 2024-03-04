@@ -1,5 +1,5 @@
 import { Input } from "@nextui-org/react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useSearch } from "../hooks/useSearch";
 import { FilmCard } from "../components/FilmCard";
 import { ContinueWatching } from "./ContinueWatching";

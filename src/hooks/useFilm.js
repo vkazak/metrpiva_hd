@@ -6,7 +6,7 @@ import { getFilmDataFromStorage, saveFilmDataToStorage, updateFilmStateInStorage
 
 const useFilmApi = () => {
 
-    const getFilmData = async (id) => {
+    const getFilmData = useCallback(async (id) => {
         if (getFilmDataFromStorage(id)) {
             return getFilmDataFromStorage(id);
         } else {
@@ -16,16 +16,16 @@ const useFilmApi = () => {
 
             return filmData;
         }
-    }
+    }, [])
 
-    const getBalancerInitFilmData = async (id) => {
+    const getBalancerInitFilmData = useCallback(async (id) => {
         const balancerResponse = await fetch(`${VOIDBOOST_URL}/embed/${id}`);
         const balancerHtml = await balancerResponse.text();
 
         return getFilmDataFromVoidboostHtml(balancerHtml);
-    }
+    }, []);
 
-    const getBalancerFilmData = async ({ id, token, type, season, episode }) => {
+    const getBalancerFilmData = useCallback(async ({ id, token, type, season, episode }) => {
         let queryUrl;
         
         if (token) {
@@ -33,7 +33,7 @@ const useFilmApi = () => {
         } else if (id) {
             queryUrl = new URL(`${VOIDBOOST_URL}/embed/${id}`);
         } else  {
-            throw "No token or id provided to fetch from Videoboost"
+            throw new Error("No token or id provided to fetch from Videoboost");
         }   
 
         if (season) {
@@ -47,7 +47,7 @@ const useFilmApi = () => {
         const balancerHtml = await balancerResponse.text();
 
         return getFilmDataFromVoidboostHtml(balancerHtml);
-    }
+    }, []);
 
     return {
         getFilmData,
@@ -93,12 +93,12 @@ export const useFilm = (id, initState) => {
     const [selectedSeasonEpisode, setSelectedSeasonEpisode] = useState(null);
 
     const getTranslatorToken = useCallback((translators, translatorId) => {
-        return translators?.find(tr => tr.id == translatorId)?.token || null;
+        return translators?.find(tr => tr.id === translatorId)?.token || null;
     }, []);
     const checkIfEpisodeExists = useCallback((episodes, season, episode) => {
-        return !!episodes?.[season]?.find(ep => ep.id == episode);
+        return !!episodes?.[season]?.find(ep => ep.id === episode);
     }, []);
-
+    
     useEffect(() => {
         const fetchFilmData = async () => {
             setIsFilmDataLoading(true);
@@ -112,10 +112,10 @@ export const useFilm = (id, initState) => {
             }
         };
 
-        if (id) {
+        if (id && filmData?.kinopoiskId !== +id) {
             fetchFilmData();
         }
-    }, [id]);
+    }, [id, getFilmData, filmData]);
 
     // This useEffect is responsible for init loading of film data from voidboost
     useEffect(() => {
@@ -133,7 +133,7 @@ export const useFilm = (id, initState) => {
                     setSelectedTranslator(filmInitState.translatorId);
                 }
                 if (filmInitState.season) {
-                    setSelectedSeasonEpisode({ season: filmInitState.season, episode: filmInitState.episode });
+                    setSelectedSeasonEpisode({ season: +filmInitState.season, episode: +filmInitState.episode });
                 }
 
                 const translatorToken = getTranslatorToken(balancerDataResponse.translators, filmInitState.translatorId);
@@ -165,8 +165,14 @@ export const useFilm = (id, initState) => {
         if (id && isPlayerReady) {
             fetchBalancerData();
         }
-
-    }, [id, isPlayerReady]);
+    }, [
+        id, 
+        isPlayerReady,
+        initState,
+        setStream,
+        getBalancerFilmData,
+        getTranslatorToken,
+    ]);
 
     useEffect(() => {
         if (filmData) {
@@ -176,7 +182,7 @@ export const useFilm = (id, initState) => {
                 name: filmData.nameRu || filmData.nameOriginal 
             });
         }
-    }, [filmData]);
+    }, [id, filmData]);
 
     const updateSelectedTranslator = useCallback(async (translatorId) => {
         setIsBalancerFilmDataLoading(true);
@@ -242,7 +248,19 @@ export const useFilm = (id, initState) => {
         } finally {
             setIsBalancerFilmDataLoading(false);
         }
-    }, [id, selectedSeasonEpisode, balancerData, setStream]);
+    }, [
+        id, 
+        selectedSeasonEpisode, 
+        balancerData, 
+        checkIfEpisodeExists,
+        getBalancerFilmData,
+        setStream,
+        getIsPlaying,
+        getTime,
+        getTranslatorToken,
+        setTime,
+        startPlaying
+    ]);
 
     const updateSelectedSeasonEpisode = useCallback(async (season, episode) => {
         setIsBalancerFilmDataLoading(true);
@@ -269,15 +287,22 @@ export const useFilm = (id, initState) => {
         } finally {
             setIsBalancerFilmDataLoading(false);
         }
-    }, [id, selectedTranslator, balancerData]);
+    }, [
+        id, 
+        selectedTranslator, 
+        balancerData,
+        getBalancerFilmData,
+        getTranslatorToken,
+        setStream
+    ]);
 
     // Watching for 'end' event from player to switch episode to next if possible.
     useEffect(() => {
         const loadAndStartNextEpisodeIfExists = async () => {
-            const nextEpisodeInSeasonExists = checkIfEpisodeExists(balancerData.episodes, selectedSeasonEpisode?.season, +selectedSeasonEpisode?.episode + 1);
-            
+            const nextEpisodeInSeasonExists = checkIfEpisodeExists(balancerData.episodes, selectedSeasonEpisode?.season, selectedSeasonEpisode?.episode + 1);
+
             if (nextEpisodeInSeasonExists) {
-                await updateSelectedSeasonEpisode(selectedSeasonEpisode.season, +selectedSeasonEpisode.episode + 1);
+                await updateSelectedSeasonEpisode(selectedSeasonEpisode.season, selectedSeasonEpisode.episode + 1);
                 setTimeout(startPlaying, 500);
             }
         }
@@ -285,7 +310,15 @@ export const useFilm = (id, initState) => {
         addListener('end', loadAndStartNextEpisodeIfExists);
 
         return () => removeListener('end', loadAndStartNextEpisodeIfExists);
-    }, [balancerData, selectedSeasonEpisode, updateSelectedSeasonEpisode, startPlaying]);
+    }, [
+        balancerData, 
+        selectedSeasonEpisode, 
+        updateSelectedSeasonEpisode, 
+        startPlaying,
+        addListener,
+        removeListener,
+        checkIfEpisodeExists,
+    ]);
 
     return {
         isFilmDataLoading,

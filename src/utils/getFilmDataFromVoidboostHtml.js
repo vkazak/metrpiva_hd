@@ -31,7 +31,7 @@ const getSeasons = (html) => {
     const seasonsSelect = dom.querySelector('#season-number');
     const seasons = [...(seasonsSelect?.children || [])]
         ?.map(option => ({
-            id: option.getAttribute('value'),
+            id: +option.getAttribute('value'),
             name: option.innerText
         }));
 
@@ -45,7 +45,7 @@ const getEpisodes = (html) => {
 
     for (const season in episodes) {
         episodes[season] = episodes[season].map(episode => ({
-            id: episode,
+            id: +episode,
             name: `Серия ${episode}`
         }))
     }
