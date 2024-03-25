@@ -4,9 +4,11 @@ import { useFilm } from "../hooks/useFilm"
 import { useParams } from "react-router-dom";
 import { Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
 import { getFilmStateFromStorage } from "../utils/localStorageUtils";
-import { LoaderOverlay } from "../Loader";
+import { LoaderOverlay } from "../components/Loader";
 import { hitPageLoad } from "../utils/ym";
 import { SequelsAndPrequels } from "./SequelsAndPrequels";
+import { AnimatedDiv } from "../components/AnimatedDiv";
+import { AnimatePresence } from "framer-motion";
 
 const TranslatorsSelect = ({
     className = '',
@@ -172,6 +174,7 @@ export const FilmPage = () => {
         translators,
         selectedTranslator,
         updateSelectedTranslator,
+        stream,
         seasons,
         episodes,
         selectedSeasonEpisode,
@@ -183,6 +186,8 @@ export const FilmPage = () => {
 
     const [openSeason, setOpenSeason] = useState(seasons?.[0]?.id || null);
     const hasSeasons = useMemo(() => !!seasons?.length, [seasons]);
+    const isShowLoader = useMemo(() => !stream && (isFilmDataLoading || isBalancerFilmDataLoading),
+        [stream, isBalancerFilmDataLoading, isFilmDataLoading]);
 
     useEffect(() => {
         if (selectedSeasonEpisode?.season) {
@@ -197,9 +202,12 @@ export const FilmPage = () => {
     }, [id]);
 
     return <>
+        <AnimatePresence>
+            {isShowLoader && <LoaderOverlay />}
+        </AnimatePresence>
         <PosterImage url={posterUrl} />
-        <div className="mt-6 relative z-10 grid grid-cols-12 gap-4">
-            {isFilmDataLoading && <LoaderOverlay />}
+        <div className={`mt-6 relative z-10 grid grid-cols-12 gap-4 
+            ${isShowLoader ? 'opacity-0' : 'opacity-1'} duration-500` }>
             <div className={`col-start-1 col-end-13 transition-all 
                 ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}`}>
                 <h1 className="text-3xl">{nameRu}</h1>
@@ -219,7 +227,7 @@ export const FilmPage = () => {
                 selectedSeason={openSeason}
                 onSelect={setOpenSeason}
             />}
-            {selectedSeasonEpisode?.episode && 
+            {selectedSeasonEpisode?.episode && document.getElementById('oframeplayer') &&
                 createPortal(
                     <div className={`backdrop-blur-sm bg-black/50 absolute z-10 p-3 pr-5 rounded-br-full transition-opacity shadow ${
                         isPlaying ? 'opacity-0' : ''}`}>
@@ -245,7 +253,7 @@ export const FilmPage = () => {
             {isError && <p className="py-20 text-center text-2xl opacity-80 col-start-1 col-end-13 sm:col-start-3 sm:col-end-11">
                 Похоже этого фильма нет в базе балансёра. Либо произошла ошибка при загрузке :(   
             </p>}
-            {!!episodes?.[openSeason] && <div className="shadow-lg max-h-48 sm:h-0 sm:min-h-full 
+            {!!episodes?.[openSeason] && <AnimatedDiv className="shadow-lg max-h-48 sm:h-0 sm:min-h-full 
                 col-start-1 sm:col-start-9 col-end-13">
                 <EpisodesList 
                     className="h-full"
@@ -253,7 +261,7 @@ export const FilmPage = () => {
                     selectedEpisode={openSeason === selectedSeasonEpisode?.season ? selectedSeasonEpisode?.episode : null}
                     onSelect={(episode) => updateSelectedSeasonEpisode(openSeason, episode)}
                 />
-            </div>}
+            </AnimatedDiv>}
             <AdditionalInfo 
                 className={`col-start-1 col-end-12 mt-4 sm:mt-8
                     ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}`}

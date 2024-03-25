@@ -3,8 +3,9 @@ import { useCallback, useEffect, useState } from "react"
 import { useSearch } from "../hooks/useSearch";
 import { FilmCard } from "../components/FilmCard";
 import { ContinueWatching } from "./ContinueWatching";
-import { LoaderOverlay } from "../Loader";
+import { LoaderOverlay } from "../components/Loader";
 import { hitPageLoad } from "../utils/ym";
+import { AnimatedDiv } from "../components/AnimatedDiv";
 
 export const HomePage = () => {
     const [searchValue, setSearchValue] = useState("");
@@ -46,7 +47,7 @@ export const HomePage = () => {
         }
     }, [searchResults]);
 
-    return <div className="home flex flex-col h-full">
+    return <AnimatedDiv className="home flex flex-col h-full">
         <ContinueWatching />
         <div id="search" className="flex items-center justify-center mt-10">
             <Input 
@@ -74,5 +75,5 @@ export const HomePage = () => {
                 ))
             }
         </div>
-    </div>
+    </AnimatedDiv>
 }
