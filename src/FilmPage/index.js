@@ -149,7 +149,7 @@ const PosterImage = ({ url }) => {
     </div>
 }
 
-export const FilmPage = () => {
+const FilmPage = () => {
     const { id } = useParams();
     const initFilmStateFromStorage = useMemo(
         () => getFilmStateFromStorage(id), 
@@ -279,4 +279,10 @@ export const FilmPage = () => {
             />
         </div>
     </>
+}
+
+export const FilmPageWrapper = () => {
+    const { id } = useParams();
+
+    return <FilmPage key={id} />
 }
