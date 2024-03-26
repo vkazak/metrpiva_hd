@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { HomePage } from "./HomePage";
 import { Header } from "./Header";
-import { FilmPage } from "./FilmPage";
+import { FilmPageWrapper } from "./FilmPage";
 import { Footer } from "./Footer";
 
 import { validateAndClearLocalStorage } from "./utils/localStorageUtils";
@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     },
     {
         path: '/watch/:id',
-        element: <FilmPage />
+        element: <FilmPageWrapper/>
     },
 ]);
 
