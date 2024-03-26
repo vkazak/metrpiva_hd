@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { KP_WORKER_URL, VOIDBOOST_URL } from "../Constants";
 import { getFilmDataFromVoidboostHtml } from "../utils/getFilmDataFromVoidboostHtml";
 import { usePlayer } from "./usePlayer";
@@ -98,7 +98,7 @@ export const useFilm = (id, initState) => {
     const checkIfEpisodeExists = useCallback((episodes, season, episode) => {
         return !!episodes?.[season]?.find(ep => ep.id === episode);
     }, []);
-    
+
     useEffect(() => {
         const fetchFilmData = async () => {
             setIsFilmDataLoading(true);
@@ -320,15 +320,35 @@ export const useFilm = (id, initState) => {
         checkIfEpisodeExists,
     ]);
 
+    const episodes = useMemo(() => {
+        // collecting episode data from balancer and kp api together
+       const preparedEpisodes = structuredClone(balancerData.episodes);
+       
+       for (const seasonKey in preparedEpisodes) {
+            const currentSeasonEpisodesInfo = filmData.episodes?.items?.find?.(season => season.number === +seasonKey) || {};
+
+            for (const curEpisode of preparedEpisodes[seasonKey]) {
+                const curEpisodeInfo = currentSeasonEpisodesInfo.episodes?.find?.(episode => episode.episodeNumber === +curEpisode.id);
+                curEpisode.nameRu = curEpisodeInfo?.nameRu;
+                curEpisode.nameEn = curEpisodeInfo?.nameEn;
+                curEpisode.releaseDate = curEpisodeInfo?.releaseDate;
+                curEpisode.synopsis = curEpisodeInfo?.synopsis;
+            }
+       }
+
+       return preparedEpisodes;
+    }, [filmData.episodes, balancerData.episodes]);
+
     return {
         isFilmDataLoading,
         isBalancerFilmDataLoading,
         isError,
         isPlaying,
-        ...filmData,
-        ...balancerData,
+        filmData,
+        balancerData,
         selectedTranslator,
         updateSelectedTranslator,
+        episodes,
         selectedSeasonEpisode,
         updateSelectedSeasonEpisode
     }

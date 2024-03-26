@@ -46,7 +46,7 @@ const getEpisodes = (html) => {
     for (const season in episodes) {
         episodes[season] = episodes[season].map(episode => ({
             id: +episode,
-            name: `Серия ${episode}`
+            title: `Серия ${episode}`
         }))
     }
 
