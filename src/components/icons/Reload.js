@@ -1,5 +1,5 @@
-export const Reload = () => {
-    return <svg fill="#ffffff" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" 
+export const Reload = ({ className }) => {
+    return <svg className={ className } fill="#ffffff" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" 
         viewBox="0 0 489.533 489.533">
         <g>
             <path d="M268.175,488.161c98.2-11,176.9-89.5,188.1-187.7c14.7-128.4-85.1-237.7-210.2-239.1v-57.6c0-3.2-4-4.9-6.7-2.9

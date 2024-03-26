@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "r
 import { createPortal } from "react-dom";
 import { useFilm } from "../hooks/useFilm"
 import { useParams } from "react-router-dom";
-import { Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
+import { Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
 import { getFilmStateFromStorage } from "../utils/localStorageUtils";
 import { LoaderOverlay } from "../components/Loader";
 import { hitPageLoad } from "../utils/ym";
@@ -173,10 +173,10 @@ const AdditionalInfo = ({
     year
 }) => {
     return <div className={"grid cols-2 gap-4 " + className}>
-        <p>Год: </p><p>{year}</p>
-        <p>Страна: </p><p>{countries?.map(({ country }) => country)?.join(', ')}</p>
-        <p>Продолжительность: </p><p>{filmLength} минут</p>
-        <p>Жанр: </p><p>{genres?.map(({ genre }) => genre)?.join(', ')}</p>
+        {year && <><p>Год: </p><p>{year}</p></>}
+        {!!countries?.length && <><p>Страна: </p><p>{countries?.map(({ country }) => country)?.join(', ')}</p></>}
+        {filmLength && <><p>Продолжительность: </p><p>{filmLength} минут</p></>}
+        {!!genres?.length && <><p>Жанр: </p><p>{genres?.map(({ genre }) => genre)?.join(', ')}</p></>}
         <p>Рейтинг: </p><p>КП: {ratingKinopoisk} &nbsp;&nbsp;&nbsp; IMDB: {ratingImdb}</p>
         <p className="col-span-2">{description}</p>
     </div>
@@ -191,6 +191,20 @@ const PosterImage = ({ url }) => {
         />
         <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-black"></div>
     </div>
+}
+
+const ReloadButton = () => {
+    const onClick = useCallback(() => {
+        document.location.reload();
+    }, [])
+    return <Button 
+        onClick={onClick}
+        variant="light"
+        radius="full"
+        isIconOnly 
+    >
+        <Reload className="w-6 opacity-80"/>
+    </Button>
 }
 
 const FilmPage = () => {
@@ -242,7 +256,10 @@ const FilmPage = () => {
             ${isShowLoader ? 'opacity-0' : 'opacity-1'} duration-500` }>
             <div className={`col-start-1 col-end-13 transition-all 
                 ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}`}>
-                <h1 className="text-3xl">{filmData.nameRu}</h1>
+                <div className="flex gap-3 items-center">
+                    <h1 className="text-3xl">{filmData.nameRu}</h1>
+                    <ReloadButton />
+                </div>
                 <h3 className="opacity-70">{filmData.nameOriginal}</h3>
             </div>
             <TranslatorsSelect 
