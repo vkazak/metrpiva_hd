@@ -91,7 +91,7 @@ const EpisodeTile = forwardRef(({
         } else {
             return title;
         }
-    });
+    }, [nameRu, nameEn, title, id]);
     
     return <motion.div 
         key={id}
