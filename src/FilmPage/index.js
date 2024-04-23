@@ -215,11 +215,13 @@ const FilmPage = () => {
     );
     const {
         isFilmDataLoading,
-        isBalancerFilmDataLoading,
+        isBalancerInitFilmDataLoading,
+        isStreamLoading,
         isError,
         isPlaying,
         filmData,
         balancerData,
+        balancerEpisodes,
         selectedTranslator,
         updateSelectedTranslator,
         episodes,
@@ -230,18 +232,18 @@ const FilmPage = () => {
     usePageTitle(filmData.nameRu || filmData.nameOriginal);
     useHitFilmPageLoad(filmData.nameRu || filmData.nameOriginal);
 
-    const [openSeason, setOpenSeason] = useState(balancerData.seasons?.[0]?.id || null);
-    const hasSeasons = useMemo(() => !!balancerData.seasons?.length, [balancerData.seasons]);
-    const isShowLoader = useMemo(() => !balancerData.stream && (isFilmDataLoading || isBalancerFilmDataLoading),
-        [balancerData.stream, isBalancerFilmDataLoading, isFilmDataLoading]);
+    const [openSeason, setOpenSeason] = useState(balancerEpisodes.seasons?.[0]?.id || null);
+    const hasSeasons = balancerData.hasSeasons;
+    const isShowLoader = useMemo(() => isFilmDataLoading || isBalancerInitFilmDataLoading,
+        [isBalancerInitFilmDataLoading, isFilmDataLoading]);
 
     useEffect(() => {
         if (selectedSeasonEpisode?.season) {
             setOpenSeason(selectedSeasonEpisode.season);
         } else {
-            setOpenSeason(balancerData.seasons?.[0]?.id || null);
+            setOpenSeason(balancerEpisodes.seasons?.[0]?.id || null);
         }
-    }, [selectedSeasonEpisode, balancerData.seasons]);
+    }, [selectedSeasonEpisode, balancerEpisodes.seasons]);
 
     useEffect(() => {
         window.scrollTo({top: 0, behavior: 'smooth'});
@@ -266,13 +268,13 @@ const FilmPage = () => {
                 className={`col-start-1 col-end-9 
                     ${hasSeasons ? 'sm:col-end-4' : 'sm:col-start-3 sm:col-end-6'}`}
                 translators={balancerData.translators} 
-                isDisabled={isBalancerFilmDataLoading}
+                isDisabled={isStreamLoading}
                 selected={selectedTranslator} 
                 onSelect={updateSelectedTranslator}
             />
             {hasSeasons && <SeasonsList 
                 className="col-start-1 col-end-13 sm:col-end-9"
-                seasons={balancerData.seasons}
+                seasons={balancerEpisodes.seasons}
                 selectedSeason={openSeason}
                 onSelect={setOpenSeason}
             />}
@@ -287,7 +289,7 @@ const FilmPage = () => {
                     document.getElementById('oframeplayer')
                 )
             }
-            {isBalancerFilmDataLoading && document.getElementById('oframeplayer') &&
+            {isStreamLoading && document.getElementById('oframeplayer') &&
                 createPortal(
                     <LoaderOverlay />,
                     document.getElementById('oframeplayer')
