@@ -1,6 +1,6 @@
 {
     "name": "metrpiva_hd",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "private": true,
     "dependencies": {
         "@nextui-org/react": "^2.2.9",
@@ -28,8 +28,7 @@
     },
     "browserslist": {
         "production": [
-            ">0.2%",
-            "not dead",
+            ">=0.1%",
             "not op_mini all"
         ],
         "development": [
