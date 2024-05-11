@@ -116,7 +116,11 @@ export const useFilm = (id, initState) => {
         const fetchFilmData = async () => {
             setIsFilmDataLoading(true);
             try {
-                setFilmData(await getFilmData(id));
+                const filmData = await getFilmData(id);
+                if (!filmData.kinopoiskId) {
+                    throw new Error('Could not fetch film data for provided id');
+                }
+                setFilmData(filmData);
             } catch (err) {
                 console.error(err);
                 setIsError(true);
@@ -125,10 +129,10 @@ export const useFilm = (id, initState) => {
             }
         };
 
-        if (id && filmData?.kinopoiskId !== +id) {
+        if (id && filmData?.kinopoiskId !== +id && !isError) {
             fetchFilmData();
         }
-    }, [id, getFilmData, filmData]);
+    }, [id, getFilmData, filmData, isError]);
 
     // This useEffect is responsible for init loading of film data from rezka
     useEffect(() => {
