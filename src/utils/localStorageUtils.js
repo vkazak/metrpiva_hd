@@ -116,3 +116,17 @@ export const validateAndClearLocalStorage = () => {
         localStorage.setItem('last_clear', timestampNow);
     }
 }
+
+export const getWatchingProgress = ({ id, season, episode }) => {
+    const playerStateString = localStorage.getItem(
+        `pljsplayfrom_${window.location.hostname}cuid-${id}-${season ? `s${season}` : ''}-${episode ? `e${episode}` : ''}`
+    );
+
+    if (!playerStateString) {
+        return 0;
+    } else {
+        const stateArr = playerStateString.split('--');
+
+        return stateArr[0] / stateArr[1];
+    }
+}

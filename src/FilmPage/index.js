@@ -3,13 +3,14 @@ import { createPortal } from "react-dom";
 import { useFilm } from "../hooks/useFilm"
 import { useParams } from "react-router-dom";
 import { Button, Image, ScrollShadow, Select, SelectItem, Tab, Tabs } from "@nextui-org/react";
-import { getFilmStateFromStorage } from "../utils/localStorageUtils";
+import { getFilmStateFromStorage, getWatchingProgress } from "../utils/localStorageUtils";
 import { LoaderOverlay } from "../components/Loader";
 import { hitPageLoad } from "../utils/ym";
 import { SequelsAndPrequels } from "./SequelsAndPrequels";
 import { AnimatedDiv } from "../components/AnimatedDiv";
 import { AnimatePresence, motion } from "framer-motion";
 import { Reload } from "../components/icons/Reload";
+import { ProgressLine } from "../components/ProgressLine";
 
 const TranslatorsSelect = ({
     className = '',
@@ -84,6 +85,7 @@ const EpisodeTile = forwardRef(({
     nameEn,
     releaseDate,
     synopsis,
+    progress = 0.5,
 }, ref) => {
     const titleToShow = useMemo(() => {
         if (nameRu || nameEn) {
@@ -96,7 +98,7 @@ const EpisodeTile = forwardRef(({
     return <motion.div 
         key={id}
         ref={ref}
-        className={`px-3 py-2 m-2 cursor-pointer border border-white/15 rounded
+        className={`relative px-3 py-2 m-2 cursor-pointer border border-white/15 rounded overflow-hidden
             ${selected ? "bg-white/20 border-white/50" : ""}`}
         onClick={onClick}
         whileHover={{ scale: 1.02 }}
@@ -108,10 +110,11 @@ const EpisodeTile = forwardRef(({
     >
         <p className="text-base line-clamp-1">{titleToShow}</p>
         <p className="text-xs opacity-70 line-clamp-2">{synopsis}</p>
+        {!selected && <ProgressLine className="absolute left-0 bottom-0" progress={progress}/>}
     </motion.div>
 });
 
-const EpisodesList = ({ className, episodes, selectedEpisode, onSelect }) => {
+const EpisodesList = ({ className, id, seasonId, episodes, selectedEpisode, onSelect }) => {
     const episodesListRef = useRef();
     const selectedEpisodeRef = useRef();
     
@@ -139,6 +142,7 @@ const EpisodesList = ({ className, episodes, selectedEpisode, onSelect }) => {
                 nameEn={episode.nameEn}
                 synopsis={episode.synopsis}
                 releaseDate={episode.releaseDate}
+                progress={getWatchingProgress({ id, season: seasonId, episode: episode.id })}
             />
         ))}
     </ScrollShadow>
@@ -308,6 +312,8 @@ const FilmPage = () => {
                 col-start-1 sm:col-start-9 col-end-13">
                 <EpisodesList 
                     className="h-full"
+                    id={id}
+                    seasonId={openSeason}
                     episodes={episodes?.[openSeason]}
                     selectedEpisode={openSeason === selectedSeasonEpisode?.season ? selectedSeasonEpisode?.episode : null}
                     onSelect={(episode) => updateSelectedSeasonEpisode(openSeason, episode)}
