@@ -236,13 +236,13 @@ const FilmPage = () => {
     usePageTitle(filmData.nameRu || filmData.nameOriginal);
     useHitFilmPageLoad(filmData.nameRu || filmData.nameOriginal);
 
-    const [openSeason, setOpenSeason] = useState(balancerEpisodes.seasons?.[0]?.id || null);
+    const [openSeason, setOpenSeason] = useState(balancerEpisodes.seasons?.[0]?.id);
     const hasSeasons = balancerData.hasSeasons;
     const isShowLoader = useMemo(() => isFilmDataLoading || isBalancerInitFilmDataLoading,
         [isBalancerInitFilmDataLoading, isFilmDataLoading]);
 
     useEffect(() => {
-        if (selectedSeasonEpisode?.season) {
+        if (selectedSeasonEpisode?.season || selectedSeasonEpisode?.season === 0) {
             setOpenSeason(selectedSeasonEpisode.season);
         } else {
             setOpenSeason(balancerEpisodes.seasons?.[0]?.id || null);
@@ -252,7 +252,7 @@ const FilmPage = () => {
     useEffect(() => {
         window.scrollTo({top: 0, behavior: 'smooth'});
     }, [id]);
-
+    console.log(balancerEpisodes.seasons);
     return <>
         <AnimatePresence>
             {isShowLoader && <LoaderOverlay />}
