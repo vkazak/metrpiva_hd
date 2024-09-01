@@ -37,13 +37,16 @@ export const usePlayer = () => {
         }
     }, [player, addListener]);
 
-    const setStream = useCallback(({ stream, thumbnails, cuid }) => {
+    const setStream = useCallback(({ stream, thumbnails, subtitle, cuid }) => {
         player?.api("preload", stream);
         if (cuid) {
             player?.api("cuid", cuid);
         }
         if (thumbnails) {
             player?.api("thumbnails", thumbnails);
+        }
+        if (subtitle) {
+            player?.api("subtitle", subtitle);
         }
     }, [player]);
 
