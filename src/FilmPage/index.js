@@ -252,7 +252,7 @@ const FilmPage = () => {
     useEffect(() => {
         window.scrollTo({top: 0, behavior: 'smooth'});
     }, [id]);
-    console.log(balancerEpisodes.seasons);
+
     return <>
         <AnimatePresence>
             {isShowLoader && <LoaderOverlay />}
