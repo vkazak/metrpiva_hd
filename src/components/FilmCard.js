@@ -25,19 +25,20 @@ export const FilmCard = ({
 
     return <Link className="block h-fit" to={`/watch/${id}`}>
         <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.8 }}
-            whileHover={{ opacity: 1, scale: 1.05 }} 
-            whileTap={{ opacity: 1, scale: 0.95 }}
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 200, damping: 10 }} 
             className={className}
         >
-            <Card className="shadow">
-                { rating && rating !== 'null' && <div className={`absolute top-0 right-4 ${ratingColor} z-20 shadow-lg`}>
-                    <p className="p-2 text-lg">{rating}</p>
-                </div> }
+            <Card className="shadow" radius="none">
+                { rating && rating !== 'null' && 
+                    <div className={`absolute top-2 right-2 rounded w-11 h-11 flex justify-center items-center ${ratingColor} z-20 shadow-lg bg-opacity-80 backdrop-blur`}>
+                        <p className="text-xl font-bold font-jura">{rating}</p>
+                    </div> 
+                }
                 <Image 
                     className="w-96 h-auto object-cover aspect-[2/3]"
+                    radius="none"
                     src={poster}
                 />
             </Card>

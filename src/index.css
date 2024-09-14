@@ -3,20 +3,26 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jura:wght@300..700&display=swap');
 
 body {
     margin: 0;
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  /*  background:
-        radial-gradient(black 15%, transparent 16%) 0 0,
-        radial-gradient(black 15%, transparent 16%) 8px 8px,
-        radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
-        radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;*/
-    background-color: black;
-    background-size:16px 16px;
+    background-color: #0D0D0F;
     min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Jura", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 800;
+}
+
+.font-jura {
+    font-family: "Jura", sans-serif;
+    font-optical-sizing: auto;
 }
 
 ::-webkit-scrollbar {

@@ -6,6 +6,7 @@ import { ContinueWatching } from "./ContinueWatching";
 import { LoaderOverlay } from "../components/Loader";
 import { hitPageLoad } from "../utils/ym";
 import { AnimatedDiv } from "../components/AnimatedDiv";
+import { SearchIcon } from "../components/icons/SearchIcon";
 
 export const HomePage = () => {
     const [searchValue, setSearchValue] = useState("");
@@ -52,15 +53,18 @@ export const HomePage = () => {
         <div id="search" className="flex items-center justify-center mt-10">
             <Input 
                 type="search"
-                radius="full"
-                placeholder="Поиск"
+                placeholder="Введите название фильма"
+                size='sm'
                 className="max-w-screen-md p-6"
                 onValueChange={setSearchValue}
                 onKeyDown={handleKeyDown}
+                radius='full'
+                variant="faded"
+                startContent={<SearchIcon className='w-5 h-5'/>}
             />
         </div>
         <SearchInfoLabel />
-        <div className="grid relative min-h-28 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 xl:gap-10">
+        <div className="grid relative min-h-28 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
             { searchInProgress && <LoaderOverlay /> }
             {
                 searchResults.map(film => (

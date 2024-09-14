@@ -6,7 +6,7 @@ export const ContinueWatching = () => {
     const lastStates = useMemo(() => getLastSavedStates() || [], []);
 
     return !!lastStates?.length && <VerticalFilmsList 
-        title="Продолжить:"
+        title=""
         list={lastStates}
     />
 }

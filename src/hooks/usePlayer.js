@@ -7,7 +7,7 @@ export const usePlayer = () => {
 
     useEffect(() => {
         const script = document.createElement('script');
-        script.src = '/playerjs.js';
+        script.src = '/player-v1.2.0.js';
         script.async = true;
         document.body.appendChild(script);
         script.addEventListener('load', () => {

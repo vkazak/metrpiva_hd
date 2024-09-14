@@ -11,6 +11,9 @@ import { AnimatedDiv } from "../components/AnimatedDiv";
 import { AnimatePresence, motion } from "framer-motion";
 import { Reload } from "../components/icons/Reload";
 import { ProgressLine } from "../components/ProgressLine";
+import { useResizeObserver } from "../hooks/useResizeObserver";
+import { ChevronLeftIcon } from "../components/icons/ChevronLeftIcon";
+import { ChevronRightIcon } from "../components/icons/ChevronRightIcon";
 
 const TranslatorsSelect = ({
     className = '',
@@ -39,12 +42,11 @@ const TranslatorsSelect = ({
     };
 
     return <Select 
-        className={"shadow " + className}
+        className={className}
         isDisabled={isDisabled}
         label="Перевод" 
-        variant="bordered"
+        variant="faded"
         selectionMode="single"
-        radius="sm"
         selectedKeys={new Set([selected])}
         onChange={onChange}
     >
@@ -58,6 +60,16 @@ const TranslatorsSelect = ({
 
 const SeasonsList = ({ className, seasons, selectedSeason, onSelect }) => {
     const seasonsRef = useRef();
+    const [showChevron, setShowChevron] = useState(true);
+
+    useResizeObserver(() => setShowChevron(seasonsRef.current.offsetWidth < seasonsRef.current.scrollWidth));
+
+    const scrollHorizontally = (mult) => {
+        seasonsRef.current.scrollTo({
+            left: seasonsRef.current.scrollLeft + mult * seasonsRef.current.clientWidth * 0.9,
+            behavior: 'smooth'
+        })
+    }
 
     useEffect(() => {
         if (seasons && seasonsRef.current) {
@@ -67,13 +79,21 @@ const SeasonsList = ({ className, seasons, selectedSeason, onSelect }) => {
         }
     }, [seasons, selectedSeason]);
 
-    return <ScrollShadow orientation="horizontal" className={"relative " + className} ref={seasonsRef}>
-        <Tabs variant="underlined" onSelectionChange={key => onSelect(+key)} selectedKey={selectedSeason?.toString()} className="mb-2">
-            {seasons?.map(season => (
-                <Tab key={season.id} title={season.name} />
-            ))}
-        </Tabs>
-    </ScrollShadow>
+    return <div className={"relative " + className}>
+        <ScrollShadow orientation="horizontal" ref={seasonsRef} hideScrollBar>
+            <Tabs variant="underlined" onSelectionChange={key => onSelect(+key)} selectedKey={selectedSeason?.toString()} className="mb-2">
+                {seasons?.map(season => (
+                    <Tab key={season.id} title={season.name} />
+                ))}
+            </Tabs>
+        </ScrollShadow>
+        {showChevron && <Button className="absolute -left-4 top-1 z-20" size='sm' variant='light' isIconOnly radius="full" onClick={() => scrollHorizontally(-1)}>
+                <ChevronLeftIcon className='w-4 h-4'/>
+            </Button>}
+        {showChevron && <Button className="absolute -right-4 top-1 z-20" size='sm' variant='light' isIconOnly radius="full" onClick={() => scrollHorizontally(1)}>
+            <ChevronRightIcon className='w-4 h-4'/>
+        </Button>}
+    </div>
 } 
 
 const EpisodeTile = forwardRef(({ 
@@ -98,8 +118,8 @@ const EpisodeTile = forwardRef(({
     return <motion.div 
         key={id}
         ref={ref}
-        className={`relative px-3 py-2 m-2 cursor-pointer border border-white/15 rounded overflow-hidden
-            ${selected ? "bg-white/20 border-white/50" : ""}`}
+        className={`relative px-3 py-2 m-2 cursor-pointer border-2 border-white/15 rounded-xl overflow-hidden
+            ${selected ? "bg-fuchsia-700/20 border-3 border-fuchsia-700/50" : ""}`}
         onClick={onClick}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -108,7 +128,7 @@ const EpisodeTile = forwardRef(({
             scale: selected ? 1.02 : 1.0
         }}
     >
-        <p className="text-base line-clamp-1">{titleToShow}</p>
+        <p className="text-base line-clamp-1 font-jura font-bold">{titleToShow}</p>
         <p className="text-xs opacity-70 line-clamp-2">{synopsis}</p>
         {!selected && <ProgressLine className="absolute left-0 bottom-0" progress={progress}/>}
     </motion.div>
@@ -166,34 +186,14 @@ const useHitFilmPageLoad = (filmName) => {
     }, [filmName]);
 }
 
-const AdditionalInfo = ({
-    className = "",
-    description,
-    countries,
-    filmLength,
-    genres,
-    ratingImdb,
-    ratingKinopoisk,
-    year
-}) => {
-    return <div className={"grid cols-2 gap-4 " + className}>
-        {year && <><p>Год: </p><p>{year}</p></>}
-        {!!countries?.length && <><p>Страна: </p><p>{countries?.map(({ country }) => country)?.join(', ')}</p></>}
-        {filmLength && <><p>Продолжительность: </p><p>{filmLength} минут</p></>}
-        {!!genres?.length && <><p>Жанр: </p><p>{genres?.map(({ genre }) => genre)?.join(', ')}</p></>}
-        <p>Рейтинг: </p><p>КП: {ratingKinopoisk} &nbsp;&nbsp;&nbsp; IMDB: {ratingImdb}</p>
-        <p className="col-span-2">{description}</p>
-    </div>
-}
-
 const PosterImage = ({ url }) => {
     return <div className="fixed z-0 top-0 left-0">
         <Image 
             src={url}
             radius="none"
-            className="data-[loaded=true]:opacity-30 min-h-dvh object-cover z-0"
+            className="data-[loaded=true]:opacity-10 min-h-dvh object-cover z-0"
         />
-        <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-black"></div>
+        <div className="absolute h-full w-full top-0 z-1 bg-gradient-to-l from-[#0D0D0F]"></div>
     </div>
 }
 
@@ -209,6 +209,73 @@ const ReloadButton = () => {
     >
         <Reload className="w-6 opacity-80"/>
     </Button>
+}
+
+const TitleBlock = ({ 
+    className, 
+    nameRu, 
+    nameOriginal, 
+    year, 
+    filmLength,
+    isSerial,
+    ratingKinopoisk,
+    ratingImdb,
+    countries,
+    genres
+}) => {
+    const filmLengthString = useMemo(() => {
+        if (isSerial) {
+            return 'сериал'
+        }
+        if (!filmLength) {
+            return ''
+        }
+
+        if (filmLength >= 60) {
+            return `${Math.floor(filmLength / 60)} ч ${filmLength % 60} мин`;
+        } else {
+            return `${filmLength} мин`
+        }
+    }, [filmLength, isSerial]);
+
+    const infolineA = [];
+
+    if (nameRu && nameOriginal) {
+        infolineA.push(nameOriginal);
+    }
+    if (year) {
+        infolineA.push(`${year} год`);
+    }
+    if (filmLengthString) {
+        infolineA.push(filmLengthString);
+    }
+
+    const infolineB = [];
+
+    if (countries?.length) {
+        infolineB.push(...countries.map(({ country }) => country));
+    }
+    if (genres?.length) {
+        infolineB.push(...genres.map(({ genre }) => genre));
+    };
+
+    const Rating = ({ label, rating }) => {
+        return <div className="flex gap-2 items-center border-2 rounded px-2 opacity-70 font-jura ">
+            <p className="text-xs">{label}</p>
+            <p className="font-semibold">{rating}</p>
+        </div>
+    }
+
+    return <div className={`${className}`}>
+        <div className="flex gap-3 items-center flex-wrap">
+            <h1 className="text-3xl pb-2">{nameRu || nameOriginal}</h1>
+            {!!ratingKinopoisk && <Rating label='КП' rating={ratingKinopoisk}/>}
+            {!!ratingImdb && <Rating label='IMDB' rating={ratingImdb}/>}
+            <ReloadButton />
+        </div>
+        {infolineA.length > 0 && <h3 className="opacity-70">{infolineA.join(', ')}</h3>}
+        {infolineB.length > 0 && <h4 className="opacity-70">{infolineB.join(' / ')}</h4>}
+    </div>
 }
 
 const FilmPage = () => {
@@ -253,21 +320,27 @@ const FilmPage = () => {
         window.scrollTo({top: 0, behavior: 'smooth'});
     }, [id]);
 
+
     return <>
         <AnimatePresence>
             {isShowLoader && <LoaderOverlay />}
         </AnimatePresence>
         <PosterImage url={filmData.posterUrl} />
         <div className={`mt-6 relative z-10 grid grid-cols-12 gap-4 
-            ${isShowLoader ? 'opacity-0' : 'opacity-1'} duration-500` }>
-            <div className={`col-start-1 col-end-13 transition-all 
-                ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}`}>
-                <div className="flex gap-3 items-center">
-                    <h1 className="text-3xl">{filmData.nameRu}</h1>
-                    <ReloadButton />
-                </div>
-                <h3 className="opacity-70">{filmData.nameOriginal}</h3>
-            </div>
+            ${isShowLoader ? 'opacity-0 max-h-0 overflow-hidden' : 'opacity-1'} duration-500` }>
+            <TitleBlock 
+                className={`col-start-1 col-end-13
+                    ${hasSeasons ? 'sm:col-end-13' : 'sm:col-start-3 sm:col-end-11'}`}
+                nameRu={filmData.nameRu}
+                nameOriginal={filmData.nameOriginal}
+                year={filmData.year}
+                filmLength={filmData.filmLength}
+                isSerial={filmData.serial}
+                ratingKinopoisk={filmData.ratingKinopoisk}
+                ratingImdb={filmData.ratingImdb}
+                countries={filmData.countries}
+                genres={filmData.genres}
+            />
             <TranslatorsSelect 
                 className={`col-start-1 col-end-9 
                     ${hasSeasons ? 'sm:col-end-4' : 'sm:col-start-3 sm:col-end-6'}`}
@@ -319,19 +392,10 @@ const FilmPage = () => {
                     onSelect={(episode) => updateSelectedSeasonEpisode(openSeason, episode)}
                 />
             </AnimatedDiv>}
-            <AdditionalInfo 
-                className={`col-start-1 col-end-12 mt-4 sm:mt-8
-                    ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'}`}
-                description={filmData.description}
-                countries={filmData.countries}
-                filmLength={filmData.filmLength}
-                genres={filmData.genres}
-                ratingImdb={filmData.ratingImdb}
-                ratingKinopoisk={filmData.ratingKinopoisk}
-                year={filmData.year}
-            />
+            <p className={`col-start-1 col-end-12 mt-2 sm:mt-4
+                    ${hasSeasons ? 'sm:col-end-9' : 'sm:col-start-3 sm:col-end-11'} text-sm opacity-80`}>{filmData.description}</p>
             <SequelsAndPrequels 
-                className="col-start-1 col-end-12 mt-2"
+                className="col-start-1 col-end-13 mt-2"
                 sequelsAndPrequels={filmData.sequelsAndPrequels} 
             />
         </div>
