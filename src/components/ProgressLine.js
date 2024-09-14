@@ -6,7 +6,7 @@ export const ProgressLine = ({ className, progress }) => {
     }, [progress]);
 
     return <div 
-        className={`h-1 bg-white/40 ${className}`}
+        className={`h-1 bg-white/70 ${className}`}
         style={{ width: widthPercent }}
     />
 }

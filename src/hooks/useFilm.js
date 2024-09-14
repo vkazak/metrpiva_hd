@@ -194,6 +194,7 @@ export const useFilm = (id, initState) => {
                 setStream({ 
                     stream: curStreamData.stream, 
                     thumbnails: curStreamData.thumbnails,
+                    subtitle: curStreamData.subtitle,
                     cuid: makeCUID(id, actualSeasonEpisode.season, actualSeasonEpisode.episode)
                 });
             } catch (err) {
@@ -287,6 +288,7 @@ export const useFilm = (id, initState) => {
             setStream({
                 stream: curStreamData.stream, 
                 thumbnails: curStreamData.thumbnails,
+                subtitle: curStreamData.subtitle,
                 cuid: makeCUID(id, actualSeasonEpisode.season, actualSeasonEpisode.episode)
             });
 
@@ -334,6 +336,7 @@ export const useFilm = (id, initState) => {
             setStream({
                 stream: curStreamData.stream, 
                 thumbnails: curStreamData.thumbnails,
+                subtitle: curStreamData.subtitle,
                 cuid: makeCUID(id, season, episode)
             });
         } catch (err) {

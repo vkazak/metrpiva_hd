@@ -6,7 +6,7 @@ export const Loader = () => {
 
 export const LoaderOverlay = () => {
     return <AnimatedDiv 
-        className="absolute inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
+        className="absolute inset-0 bg-[#0D0D0F]/50 flex items-center justify-center z-50 backdrop-blur-sm"
         key="loader"
     >
         <Loader />
