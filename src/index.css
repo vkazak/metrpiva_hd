@@ -5,6 +5,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Jura:wght@300..700&display=swap');
 
+@media (max-width: 640px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 2048px) {
+    html {
+        font-size: 24px;
+    }
+}
+
 body {
     margin: 0;
     font-family: 'Inter', sans-serif;
