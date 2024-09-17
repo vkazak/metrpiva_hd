@@ -14,6 +14,8 @@ import { ProgressLine } from "../components/ProgressLine";
 import { useResizeObserver } from "../hooks/useResizeObserver";
 import { ChevronLeftIcon } from "../components/icons/ChevronLeftIcon";
 import { ChevronRightIcon } from "../components/icons/ChevronRightIcon";
+import { ChevronUpIcon } from "../components/icons/ChevronUpIcon";
+import { ChevronDownIcon } from "../components/icons/ChevronDownIcon";
 
 const TranslatorsSelect = ({
     className = '',
@@ -119,7 +121,7 @@ const EpisodeTile = forwardRef(({
         key={id}
         ref={ref}
         className={`relative px-3 py-2 m-2 cursor-pointer border-2 border-white/15 rounded-xl overflow-hidden
-            ${selected ? "bg-fuchsia-700/20 border-3 border-fuchsia-700/50" : ""}`}
+            hover:border-white/60 hover:bg-white/10 transition-colors ${selected ? "bg-fuchsia-700/20 border-3 border-fuchsia-700/50" : ""}`}
         onClick={onClick}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -135,9 +137,32 @@ const EpisodeTile = forwardRef(({
 });
 
 const EpisodesList = ({ className, id, seasonId, episodes, selectedEpisode, onSelect }) => {
+    const [showTopChevron, setShowTopChevron] = useState(true);
+    const [showBottomChevron, setShowBottomChevron] = useState(true);
     const episodesListRef = useRef();
     const selectedEpisodeRef = useRef();
+
+    window.ref = episodesListRef;
     
+    useEffect(() => {
+        const updateChevronVisibility = (e) => {
+            setShowTopChevron(e.target.scrollTop > 0);
+            setShowBottomChevron(e.target.scrollTop + e.target.offsetHeight < e.target.scrollHeight - 5);
+        };
+        episodesListRef.current.addEventListener('scroll', updateChevronVisibility);
+        
+        const episodeListCopy = episodesListRef.current;
+
+        return () => episodeListCopy.removeEventListener('scroll', updateChevronVisibility);
+    }, []);
+
+    const scrollVertically = (mult) => {
+        episodesListRef.current.scrollTo({
+            top: episodesListRef.current.scrollTop + mult * episodesListRef.current.clientHeight * 0.9,
+            behavior: 'smooth'
+        })
+    }
+
     useEffect(() => {
         if (selectedEpisode && episodesListRef.current && selectedEpisodeRef.current) {
             episodesListRef.current.scrollTop = selectedEpisodeRef.current.offsetTop - episodesListRef.current.offsetHeight / 2 + selectedEpisodeRef.current.offsetHeight / 2;
@@ -149,23 +174,31 @@ const EpisodesList = ({ className, id, seasonId, episodes, selectedEpisode, onSe
         onSelect(episodeId);
     }
 
-    return <ScrollShadow hideScrollBar className={"relative scroll-smooth " + className} ref={episodesListRef}>
-        {episodes?.map(episode => (
-            <EpisodeTile 
-                key={episode.id}
-                ref={selectedEpisode === episode.id ? selectedEpisodeRef : null}
-                selected={selectedEpisode === episode.id}
-                onClick={() => onClick(episode.id)}
-                id={episode.id}
-                title={episode.title}
-                nameRu={episode.nameRu}
-                nameEn={episode.nameEn}
-                synopsis={episode.synopsis}
-                releaseDate={episode.releaseDate}
-                progress={getWatchingProgress({ id, season: seasonId, episode: episode.id })}
-            />
-        ))}
-    </ScrollShadow>
+    return <>
+        <ScrollShadow hideScrollBar className={"relative scroll-smooth " + className} ref={episodesListRef}>
+            {episodes?.map(episode => (
+                <EpisodeTile 
+                    key={episode.id}
+                    ref={selectedEpisode === episode.id ? selectedEpisodeRef : null}
+                    selected={selectedEpisode === episode.id}
+                    onClick={() => onClick(episode.id)}
+                    id={episode.id}
+                    title={episode.title}
+                    nameRu={episode.nameRu}
+                    nameEn={episode.nameEn}
+                    synopsis={episode.synopsis}
+                    releaseDate={episode.releaseDate}
+                    progress={getWatchingProgress({ id, season: seasonId, episode: episode.id })}
+                />
+            ))}
+        </ScrollShadow>
+        {showTopChevron && <Button className="absolute -top-5 left-[calc(50%-1.25rem)] z-20" variant='light' isIconOnly radius="full" onClick={() => scrollVertically(-1)}>
+            <ChevronUpIcon className='w-6 h-6'/>
+        </Button>}
+        {showBottomChevron && <Button className="absolute -bottom-5 left-[calc(50%-1.25rem)] z-20" variant='light' isIconOnly radius="full" onClick={() => scrollVertically(1)}>
+            <ChevronDownIcon className='w-6 h-6'/>
+        </Button>}
+    </>;
 }
 
 const getPageTitle = (filmName) => `${filmName} - Metrpiva HD`;
@@ -259,18 +292,18 @@ const TitleBlock = ({
         infolineB.push(...genres.map(({ genre }) => genre));
     };
 
-    const Rating = ({ label, rating }) => {
-        return <div className="flex gap-2 items-center border-2 rounded px-2 opacity-70 font-jura ">
-            <p className="text-xs">{label}</p>
+    const Rating = ({ className, label, rating }) => {
+        return <div className={`flex items-center border-2 rounded px-2 opacity-70 font-jura ${className}`}>
+            <p className="text-xs mr-2">{label}</p>
             <p className="font-semibold">{rating}</p>
         </div>
     }
 
     return <div className={`${className}`}>
-        <div className="flex gap-3 items-center flex-wrap">
-            <h1 className="text-3xl pb-2">{nameRu || nameOriginal}</h1>
-            {!!ratingKinopoisk && <Rating label='КП' rating={ratingKinopoisk}/>}
-            {!!ratingImdb && <Rating label='IMDB' rating={ratingImdb}/>}
+        <div className="flex items-center flex-wrap">
+            <h1 className="text-3xl pb-2 mr-3">{nameRu || nameOriginal}</h1>
+            {!!ratingKinopoisk && <Rating className='mr-3' label='КП' rating={ratingKinopoisk}/>}
+            {!!ratingImdb && <Rating className='mr-3' label='IMDB' rating={ratingImdb}/>}
             <ReloadButton />
         </div>
         {infolineA.length > 0 && <h3 className="opacity-70">{infolineA.join(', ')}</h3>}
@@ -381,8 +414,8 @@ const FilmPage = () => {
             {isError && <p className="py-20 text-center text-2xl opacity-80 col-start-1 col-end-13 sm:col-start-3 sm:col-end-11">
                 Похоже этого фильма нет в базе балансёра. Либо произошла ошибка при загрузке :(   
             </p>}
-            {!!episodes?.[openSeason] && <AnimatedDiv className="shadow-lg max-h-72 sm:h-0 sm:min-h-full 
-                col-start-1 sm:col-start-9 col-end-13">
+            {!!episodes?.[openSeason] && <AnimatedDiv className="shadow-lg max-h-72 sm:h-0 min-h-full 
+                col-start-1 sm:col-start-9 col-end-13 relative">
                 <EpisodesList 
                     className="h-full"
                     id={id}

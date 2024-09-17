@@ -22,10 +22,10 @@ export const VerticalFilmsList = ({ className = '', title, list }) => {
     return <div className={`${className}`}>
         <h3 className="text sm:text-xl">{title}</h3>
         <div className="relative">
-            <ScrollShadow className="flex px-2 py-6 gap-3 sm:gap-5" ref={listRef} orientation="horizontal" hideScrollBar>
+            <ScrollShadow className="flex py-4" ref={listRef} orientation="horizontal" hideScrollBar>
                 {list.map(filmState => (
                     <FilmCard
-                        className="w-[150px] sm:w-[200px]"
+                        className="w-[12rem] m-2"
                         key={filmState.id}
                         id={filmState.id}
                         poster={filmState.poster}
@@ -35,10 +35,10 @@ export const VerticalFilmsList = ({ className = '', title, list }) => {
                     />
                 ))}
             </ScrollShadow>
-            {showChevron && <Button className="absolute left-0 top-[110px] sm:top-[150px] z-20" variant='flat' isIconOnly radius="full" onClick={() => scrollHorizontally(-1)}>
+            {showChevron && <Button className="absolute left-0 top-[9rem] z-20" variant='flat' isIconOnly radius="full" onClick={() => scrollHorizontally(-1)}>
                 <ChevronLeftIcon className='w-6 h-6'/>
             </Button>}
-            {showChevron && <Button className="absolute right-0 top-[110px] sm:top-[150px] z-20" variant='flat' isIconOnly radius="full" onClick={() => scrollHorizontally(1)}>
+            {showChevron && <Button className="absolute right-0 top-[9rem] z-20" variant='flat' isIconOnly radius="full" onClick={() => scrollHorizontally(1)}>
                 <ChevronRightIcon className='w-6 h-6'/>
             </Button>}
         </div>

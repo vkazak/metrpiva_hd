@@ -29,7 +29,7 @@ const App = () => {
     return (
         <>
             <Header/>
-            <div className="max-w-7xl px-4 mx-auto text-foreground z-10 box-border min-h-[calc(100dvh-10rem)]">
+            <div className="max-w-7xl px-4 mx-auto text-foreground z-10 box-border min-h-[calc(100vh-10rem)]">
                 <RouterProvider router={router} />
             </div>
             <Footer/>
